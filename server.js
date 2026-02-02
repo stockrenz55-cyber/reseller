@@ -1,7 +1,7 @@
 const express = require("express");
 const fetch = require("node-fetch");
-const jwt = require("jsonwebtoken");
 const bcrypt = require("bcryptjs");
+const jwt = require("jsonwebtoken");
 const cors = require("cors");
 const cfg = require("./config");
 
@@ -9,17 +9,16 @@ const app = express();
 app.use(cors());
 app.use(express.json());
 
-/* ================= DATABASE IN-MEMORY ================= */
-const users = {
-  owner: {
-    username: "owner",
-    password: bcrypt.hashSync("owner123", 10),
-    role: "owner",
-    device: null
-  }
+/* ================= SIMPLE DB ================= */
+const users = {};
+users[cfg.OWNER.username] = {
+  username: cfg.OWNER.username,
+  password: bcrypt.hashSync(cfg.OWNER.password, 10),
+  role: "owner",
+  device: null
 };
 
-/* ================= RESOURCE MAP (BOT 1:1) ================= */
+/* ================= RESOURCE MAP ================= */
 const resourceMap = {
   "1gb": { ram: 1000, disk: 1000, cpu: 40 },
   "2gb": { ram: 2000, disk: 1000, cpu: 60 },
@@ -31,76 +30,101 @@ const resourceMap = {
   "8gb": { ram: 8000, disk: 4000, cpu: 180 },
   "9gb": { ram: 9000, disk: 5000, cpu: 200 },
   "10gb": { ram: 10000, disk: 5000, cpu: 220 },
-  "unlimited": { ram: 0, disk: 0, cpu: 0 },
-  "unli": { ram: 0, disk: 0, cpu: 0 }
+  "unlimited": { ram: 0, disk: 0, cpu: 0 }
 };
+
+/* ================= LOG ERROR ================= */
+function logError(place, err) {
+  console.error(`\n[ERROR @ ${place}]`);
+  console.error(err);
+}
 
 /* ================= AUTH ================= */
 function auth(roles = []) {
   return (req, res, next) => {
-    const token = req.headers.authorization?.split(" ")[1];
-    if (!token) return res.sendStatus(401);
     try {
-      const d = jwt.verify(token, cfg.JWT_SECRET);
-      if (roles.length && !roles.includes(d.role))
-        return res.sendStatus(403);
-      req.user = d;
+      const token = req.headers.authorization?.split(" ")[1];
+      if (!token) return res.status(401).json({ error: "No token" });
+
+      const decoded = jwt.verify(token, cfg.JWT_SECRET);
+      if (roles.length && !roles.includes(decoded.role))
+        return res.status(403).json({ error: "Forbidden" });
+
+      req.user = decoded;
       next();
-    } catch {
-      res.sendStatus(401);
+    } catch (e) {
+      logError("AUTH", e);
+      res.status(401).json({ error: "Invalid token" });
     }
   };
 }
 
-/* ================= LOGIN + DEVICE LOCK ================= */
+/* ================= LOGIN ================= */
 app.post("/login", (req, res) => {
-  const { username, password, deviceId } = req.body;
-  const u = users[username];
-  if (!u) return res.status(401).json({ msg: "User tidak ada" });
-  if (!bcrypt.compareSync(password, u.password))
-    return res.status(401).json({ msg: "Password salah" });
+  try {
+    const { username, password, deviceId } = req.body;
+    const user = users[username];
 
-  if (u.device && u.device !== deviceId)
-    return res.status(403).json({ msg: "Akun sudah login di device lain" });
+    if (!user) return res.status(401).json({ error: "User tidak ada" });
+    if (!bcrypt.compareSync(password, user.password))
+      return res.status(401).json({ error: "Password salah" });
 
-  u.device = deviceId;
-  const token = jwt.sign({ username, role: u.role }, cfg.JWT_SECRET, {
-    expiresIn: "12h"
-  });
-  res.json({ token, role: u.role });
+    if (user.device && user.device !== deviceId)
+      return res.status(403).json({ error: "Akun login di device lain" });
+
+    user.device = deviceId;
+
+    const token = jwt.sign(
+      { username, role: user.role },
+      cfg.JWT_SECRET,
+      { expiresIn: "12h" }
+    );
+
+    res.json({ token, role: user.role });
+  } catch (e) {
+    logError("LOGIN", e);
+    res.status(500).json({ error: "Login error" });
+  }
 });
 
-/* ================= CREATE AKUN (OWNER / ADMIN) ================= */
+/* ================= CREATE USER ================= */
 app.post("/user/create", auth(["owner", "admin"]), (req, res) => {
-  const { username, password, role } = req.body;
-  if (users[username]) return res.json({ msg: "User sudah ada" });
-  if (req.user.role === "admin" && role !== "reseller")
-    return res.sendStatus(403);
+  try {
+    const { username, password, role } = req.body;
+    if (users[username])
+      return res.status(400).json({ error: "User sudah ada" });
 
-  users[username] = {
-    username,
-    password: bcrypt.hashSync(password, 10),
-    role,
-    device: null
-  };
-  res.json({ msg: "User dibuat" });
+    if (req.user.role === "admin" && role !== "reseller")
+      return res.status(403).json({ error: "Admin hanya boleh buat reseller" });
+
+    users[username] = {
+      username,
+      password: bcrypt.hashSync(password, 10),
+      role,
+      device: null
+    };
+
+    res.json({ success: true });
+  } catch (e) {
+    logError("CREATE USER", e);
+    res.status(500).json({ error: "Create user error" });
+  }
 });
 
-/* ================= CREATE PANEL (1GB–UNLI) ================= */
+/* ================= CREATE PANEL ================= */
 app.post("/panel/create", auth(["owner", "admin", "reseller"]), async (req, res) => {
   const { paket, username } = req.body;
   const spec = resourceMap[paket];
-  if (!spec) return res.json({ msg: "Paket tidak valid" });
-
-  const email = username + "@gmail.com";
-  const password = username + "001";
+  if (!spec) return res.status(400).json({ error: "Paket tidak valid" });
 
   try {
-    // create user panel
-    const u = await fetch(cfg.domain + "/api/application/users", {
+    const email = `${username}@gmail.com`;
+    const password = `${username}001`;
+
+    const u = await fetch(cfg.PTERO.DOMAIN + "/api/application/users", {
       method: "POST",
       headers: {
-        Authorization: "Bearer " + cfg.apikey,
+        Authorization: "Bearer " + cfg.PTERO.API_KEY,
         "Content-Type": "application/json"
       },
       body: JSON.stringify({
@@ -112,46 +136,13 @@ app.post("/panel/create", auth(["owner", "admin", "reseller"]), async (req, res)
       })
     }).then(r => r.json());
 
-    if (u.errors) return res.json(u.errors);
-
-    // get egg startup
-    const egg = await fetch(
-      `${cfg.domain}/api/application/nests/${cfg.nestid}/eggs/${cfg.egg}`,
-      {
-        headers: {
-          Authorization: "Bearer " + cfg.apikey,
-          "Content-Type": "application/json"
-        }
-      }
-    ).then(r => r.json());
-
-    // create server
-    const s = await fetch(cfg.domain + "/api/application/servers", {
-      method: "POST",
-      headers: {
-        Authorization: "Bearer " + cfg.apikey,
-        "Content-Type": "application/json"
-      },
-      body: JSON.stringify({
-        name: username + " Server",
-        user: u.attributes.id,
-        egg: cfg.egg,
-        docker_image: "ghcr.io/parkervcp/yolks:nodejs_20",
-        startup: egg.attributes.startup,
-        limits: {
-          memory: spec.ram,
-          disk: spec.disk,
-          cpu: spec.cpu,
-          swap: 0,
-          io: 500
-        },
-        feature_limits: { databases: 5, backups: 5, allocations: 5 },
-        deploy: { locations: [cfg.loc], dedicated_ip: false }
-      })
-    }).then(r => r.json());
+    if (u.errors) {
+      logError("PTERO USER", u.errors);
+      return res.status(500).json(u.errors);
+    }
 
     res.json({
-      msg: "Panel berhasil dibuat",
+      success: true,
       panel: {
         username,
         password,
@@ -161,43 +152,11 @@ app.post("/panel/create", auth(["owner", "admin", "reseller"]), async (req, res)
       }
     });
   } catch (e) {
-    res.json({ error: e.message });
+    logError("CREATE PANEL", e);
+    res.status(500).json({ error: e.message });
   }
-});
-
-/* ================= LIST PANEL ================= */
-app.get("/panel/list", auth(["owner", "admin", "reseller"]), async (req, res) => {
-  const r = await fetch(cfg.domain + "/api/application/servers", {
-    headers: { Authorization: "Bearer " + cfg.apikey }
-  }).then(r => r.json());
-  res.json(r.data);
-});
-
-/* ================= DELETE PANEL ================= */
-app.post("/panel/delete", auth(["owner"]), async (req, res) => {
-  const { id } = req.body;
-  await fetch(cfg.domain + `/api/application/servers/${id}`, {
-    method: "DELETE",
-    headers: { Authorization: "Bearer " + cfg.apikey }
-  });
-  res.json({ msg: "Panel dihapus" });
-});
-
-/* ================= DELETE ALL PANEL ================= */
-app.post("/panel/delete-all", auth(["owner"]), async (req, res) => {
-  const r = await fetch(cfg.domain + "/api/application/servers", {
-    headers: { Authorization: "Bearer " + cfg.apikey }
-  }).then(r => r.json());
-
-  for (const s of r.data) {
-    await fetch(cfg.domain + `/api/application/servers/${s.attributes.id}`, {
-      method: "DELETE",
-      headers: { Authorization: "Bearer " + cfg.apikey }
-    });
-  }
-  res.json({ msg: "Semua panel dihapus" });
 });
 
 app.listen(cfg.PORT, () =>
-  console.log("SERVER JALAN PORT", cfg.PORT)
+  console.log("SERVER RUNNING PORT", cfg.PORT)
 );
