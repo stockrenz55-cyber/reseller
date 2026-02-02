@@ -10,74 +10,74 @@
 <style>
 *{box-sizing:border-box;font-family:'Poppins',sans-serif}
 body{
-margin:0;
-min-height:100vh;
-background:
-linear-gradient(180deg,rgba(0,0,0,.6),rgba(0,0,0,.9)),
-url("https://images.unsplash.com/photo-1535223289827-42f1e9919769") center/cover no-repeat;
-display:flex;
-align-items:center;
-justify-content:center;
-color:#fff
+  margin:0;
+  min-height:100vh;
+  background:
+    linear-gradient(180deg,rgba(0,0,0,.6),rgba(0,0,0,.9)),
+    url("https://images.unsplash.com/photo-1535223289827-42f1e9919769") center/cover no-repeat;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  color:#fff;
 }
 .glass{
-width:460px;
-padding:30px;
-border-radius:22px;
-background:rgba(255,255,255,.08);
-backdrop-filter:blur(18px);
-box-shadow:
-0 0 25px rgba(0,255,255,.25),
-inset 0 0 20px rgba(0,255,255,.15);
-animation:fade .8s ease
+  width:460px;
+  padding:30px;
+  border-radius:22px;
+  background:rgba(255,255,255,.08);
+  backdrop-filter:blur(18px);
+  box-shadow:
+    0 0 25px rgba(0,255,255,.25),
+    inset 0 0 20px rgba(0,255,255,.15);
+  animation:fade .8s ease;
 }
 .neon{
-text-align:center;
-color:#7df9ff;
-text-shadow:
-0 0 6px #7df9ff,
-0 0 20px #00ffff,
-0 0 40px #00ffff
+  text-align:center;
+  color:#7df9ff;
+  text-shadow:
+    0 0 6px #7df9ff,
+    0 0 20px #00ffff,
+    0 0 40px #00ffff;
 }
 input,select{
-width:100%;
-margin-top:12px;
-padding:12px;
-border-radius:14px;
-border:1px solid rgba(0,255,255,.4);
-background:rgba(0,0,0,.45);
-color:#fff;
-outline:none;
-box-shadow:0 0 10px rgba(0,255,255,.3)
+  width:100%;
+  margin-top:12px;
+  padding:12px;
+  border-radius:14px;
+  border:1px solid rgba(0,255,255,.4);
+  background:rgba(0,0,0,.45);
+  color:#fff;
+  outline:none;
+  box-shadow:0 0 10px rgba(0,255,255,.3);
 }
 select option{background:#000}
 button{
-width:100%;
-margin-top:15px;
-padding:12px;
-border-radius:14px;
-border:1px solid #00ffff;
-background:transparent;
-color:#00ffff;
-font-weight:500;
-cursor:pointer;
-transition:.3s;
-text-shadow:0 0 5px #00ffff;
-box-shadow:0 0 15px rgba(0,255,255,.5)
+  width:100%;
+  margin-top:15px;
+  padding:12px;
+  border-radius:14px;
+  border:1px solid #00ffff;
+  background:transparent;
+  color:#00ffff;
+  font-weight:500;
+  cursor:pointer;
+  transition:.3s;
+  text-shadow:0 0 5px #00ffff;
+  box-shadow:0 0 15px rgba(0,255,255,.5);
 }
 button:hover{
-background:rgba(0,255,255,.15);
-box-shadow:0 0 30px #00ffff;
-transform:translateY(-2px)
+  background:rgba(0,255,255,.15);
+  box-shadow:0 0 30px #00ffff;
+  transform:translateY(-2px);
 }
 .card{
-margin-top:20px;
-padding:16px;
-border-radius:18px;
-background:rgba(0,0,0,.35);
-border:1px solid rgba(0,255,255,.4);
-box-shadow:inset 0 0 15px rgba(0,255,255,.2);
-animation:slide .6s ease
+  margin-top:20px;
+  padding:16px;
+  border-radius:18px;
+  background:rgba(0,0,0,.35);
+  border:1px solid rgba(0,255,255,.4);
+  box-shadow:inset 0 0 15px rgba(0,255,255,.2);
+  animation:slide .6s ease;
 }
 .hidden{display:none}
 @keyframes fade{from{opacity:0;transform:scale(.9)}to{opacity:1}}
@@ -88,48 +88,48 @@ animation:slide .6s ease
 
 <!-- LOGIN -->
 <div id="loginBox" class="glass">
-<h2 class="neon">LOGIN PANEL</h2>
-<input id="username" placeholder="Username">
-<input id="password" type="password" placeholder="Password">
-<button onclick="login()">LOGIN</button>
-<p id="loginMsg" style="text-align:center;color:#ff8080"></p>
+  <h2 class="neon">LOGIN PANEL</h2>
+  <input id="username" placeholder="Username">
+  <input id="password" type="password" placeholder="Password">
+  <button onclick="login()">LOGIN</button>
+  <p id="loginMsg" style="text-align:center;color:#ff8080"></p>
 </div>
 
 <!-- DASHBOARD -->
 <div id="dashboard" class="glass hidden">
-<h2 class="neon">DASHBOARD</h2>
+  <h2 class="neon">DASHBOARD</h2>
 
-<div class="card">
-<h3 class="neon">CREATE PANEL</h3>
-<input id="panelUser" placeholder="Username Panel">
+  <div class="card">
+    <h3 class="neon">CREATE PANEL</h3>
+    <input id="panelUser" placeholder="Username Panel">
 
-<select id="paket" onchange="updateSpec()">
-<option value="">Pilih Paket</option>
-<option value="1gb">1 GB</option>
-<option value="2gb">2 GB</option>
-<option value="3gb">3 GB</option>
-<option value="4gb">4 GB</option>
-<option value="5gb">5 GB</option>
-<option value="6gb">6 GB</option>
-<option value="7gb">7 GB</option>
-<option value="8gb">8 GB</option>
-<option value="9gb">9 GB</option>
-<option value="10gb">10 GB</option>
-<option value="unlimited">Unlimited</option>
-</select>
+    <select id="paket" onchange="updateSpec()">
+      <option value="">Pilih Paket</option>
+      <option value="1gb">1 GB</option>
+      <option value="2gb">2 GB</option>
+      <option value="3gb">3 GB</option>
+      <option value="4gb">4 GB</option>
+      <option value="5gb">5 GB</option>
+      <option value="6gb">6 GB</option>
+      <option value="7gb">7 GB</option>
+      <option value="8gb">8 GB</option>
+      <option value="9gb">9 GB</option>
+      <option value="10gb">10 GB</option>
+      <option value="unlimited">Unlimited</option>
+    </select>
 
-<div id="review" class="card hidden">
-<b>REVIEW SPESIFIKASI</b><br><br>
-RAM : <span id="rRam"></span><br>
-DISK : <span id="rDisk"></span><br>
-CPU : <span id="rCpu"></span>
-</div>
+    <div id="review" class="card hidden">
+      <b>REVIEW SPESIFIKASI</b><br><br>
+      RAM : <span id="rRam"></span><br>
+      DISK : <span id="rDisk"></span><br>
+      CPU : <span id="rCpu"></span>
+    </div>
 
-<button onclick="createPanel()">CREATE PANEL</button>
-</div>
+    <button onclick="createPanel()">CREATE PANEL</button>
+  </div>
 
-<div id="resultBox" class="card hidden"></div>
-<button onclick="logout()">LOGOUT</button>
+  <div id="resultBox" class="card hidden"></div>
+  <button onclick="logout()">LOGOUT</button>
 </div>
 
 <script>
@@ -148,7 +148,7 @@ const loginBox = document.getElementById("loginBox");
 const dashboard = document.getElementById("dashboard");
 
 /* ================= CONFIG ================= */
-const API = "http://localhost:3000"; // ganti sesuai backend
+const API = "http://localhost:3000"; // ganti jika backend berbeda
 
 const specs = {
   "1gb":{ram:"1 GB",disk:"1 GB",cpu:"40%"},
@@ -166,11 +166,11 @@ const specs = {
 
 /* ================= UI ================= */
 function updateSpec(){
-  if(!paket.value) return review.classList.add("hidden")
-  review.classList.remove("hidden")
-  rRam.innerText = specs[paket.value].ram
-  rDisk.innerText = specs[paket.value].disk
-  rCpu.innerText = specs[paket.value].cpu
+  if(!paket.value) return review.classList.add("hidden");
+  review.classList.remove("hidden");
+  rRam.innerText = specs[paket.value].ram;
+  rDisk.innerText = specs[paket.value].disk;
+  rCpu.innerText = specs[paket.value].cpu;
 }
 
 /* ================= AUTH ================= */
@@ -187,16 +187,16 @@ function login(){
   .then(r=>r.json())
   .then(d=>{
     if(d.token){
-      localStorage.token = d.token
-      loginBox.classList.add("hidden")
-      dashboard.classList.remove("hidden")
+      localStorage.token = d.token;
+      loginBox.classList.add("hidden");
+      dashboard.classList.remove("hidden");
     } else {
-      loginMsg.innerText = d.msg || "Login gagal"
+      loginMsg.innerText = d.msg || "Login gagal";
     }
   })
   .catch(err=>{
-    loginMsg.innerText = "Gagal terhubung ke server"
-    console.error(err)
+    loginMsg.innerText = "Gagal terhubung ke server";
+    console.error(err);
   })
 }
 
@@ -207,12 +207,12 @@ function authFetch(url,opt={}){
       "Content-Type":"application/json",
       "Authorization":"Bearer "+localStorage.token
     }
-  }).then(r=>r.json())
+  }).then(r=>r.json());
 }
 
 /* ================= CREATE PANEL ================= */
 function createPanel(){
-  if(!panelUser.value || !paket.value) return alert("Lengkapi data")
+  if(!panelUser.value || !paket.value) return alert("Lengkapi data");
 
   authFetch("/create",{
     method:"POST",
@@ -222,9 +222,9 @@ function createPanel(){
     })
   })
   .then(d=>{
-    if(d.msg) return alert(d.msg)
+    if(d.msg) return alert(d.msg);
 
-    resultBox.classList.remove("hidden")
+    resultBox.classList.remove("hidden");
     resultBox.innerHTML = `
       <h3 class="neon">PANEL CREATED</h3>
       <b>Server ID</b> : ${d.server.id}<br>
@@ -236,20 +236,20 @@ function createPanel(){
       <a href="${d.panel_url || '#'}" target="_blank" style="color:#00ffff">
         OPEN PANEL
       </a>
-    `
-  })
+    `;
+  });
 }
 
 /* ================= LOGOUT ================= */
 function logout(){
-  localStorage.clear()
-  location.reload()
+  localStorage.clear();
+  location.reload();
 }
 
 /* ================= AUTO LOGIN ================= */
 if(localStorage.token){
-  loginBox.classList.add("hidden")
-  dashboard.classList.remove("hidden")
+  loginBox.classList.add("hidden");
+  dashboard.classList.remove("hidden");
 }
 </script>
 
