@@ -1,183 +1,98 @@
 <!DOCTYPE html>
-<html lang="id">
+<html>
 <head>
 <meta charset="UTF-8">
 <title>Reseller Panel</title>
-
 <style>
-*{box-sizing:border-box}
-body{
+body {
   margin:0;
-  min-height:100vh;
-  font-family:Arial,Helvetica,sans-serif;
-  background:url("https://images.unsplash.com/photo-1535223289827-42f1e9919769");
-  background-size:cover;
-  background-position:center;
-  display:flex;
-  justify-content:center;
-  align-items:center;
+  font-family:Arial;
+  background:url("https://images.unsplash.com/photo-1518770660439-4636190af475") no-repeat center/cover;
+  color:#0ff;
 }
-
-/* ===== CARD ===== */
-.card{
-  width:360px;
+.box {
+  backdrop-filter: blur(10px);
+  background: rgba(0,0,0,.6);
   padding:20px;
-  border-radius:14px;
-  background:rgba(0,0,0,.6);
-  backdrop-filter:blur(14px);
-  box-shadow:0 0 25px rgba(0,255,255,.6);
-  color:#0ff;
+  border-radius:15px;
+  box-shadow:0 0 20px #0ff;
+  margin:20px auto;
+  width:350px;
 }
-
-/* ===== FORM ===== */
-input, select, button{
+button {
   width:100%;
-  margin:8px 0;
   padding:10px;
-  border-radius:8px;
-  border:none;
-  outline:none;
-}
-
-input, select{
-  background:rgba(255,255,255,.1);
-  color:#0ff;
-}
-
-button{
-  cursor:pointer;
-  background:transparent;
-  color:#0ff;
-  border:1px solid #0ff;
-}
-button:hover{
-  box-shadow:0 0 15px #0ff;
-}
-
-.hidden{display:none}
-
-/* ===== LOG ===== */
-pre{
   margin-top:10px;
-  max-height:160px;
-  overflow:auto;
-  font-size:12px;
-  color:#9ff;
-  background:rgba(0,0,0,.4);
-  padding:8px;
-  border-radius:8px;
+  background:transparent;
+  border:2px solid #0ff;
+  color:#0ff;
+  box-shadow:0 0 10px #0ff;
+  cursor:pointer;
 }
+#panel { display:none; }
+#log { height:200px; overflow:auto; font-size:12px; }
 </style>
 </head>
 
 <body>
 
-<!-- ===== LOGIN ===== -->
-<div class="card" id="loginBox">
-  <h3>LOGIN</h3>
-  <input id="loginUser" placeholder="Username">
-  <input id="loginPass" type="password" placeholder="Password">
+<div class="box" id="login">
+  <h2>LOGIN</h2>
+  <input id="u" placeholder="Username"><br>
+  <input id="p" type="password" placeholder="Password"><br>
   <button onclick="login()">LOGIN</button>
-  <pre id="loginLog"></pre>
 </div>
 
-<!-- ===== DASHBOARD ===== -->
-<div class="card hidden" id="dashboard">
-  <h3>CREATE PANEL</h3>
-
-  <input id="panelUser" placeholder="Username Panel">
-
-  <select id="paket">
-    <option value="1gb">1 GB</option>
-    <option value="2gb">2 GB</option>
-    <option value="3gb">3 GB</option>
-    <option value="4gb">4 GB</option>
-    <option value="5gb">5 GB</option>
-    <option value="6gb">6 GB</option>
-    <option value="7gb">7 GB</option>
-    <option value="8gb">8 GB</option>
-    <option value="9gb">9 GB</option>
-    <option value="10gb">10 GB</option>
-    <option value="unlimited">UNLIMITED</option>
-  </select>
-
-  <button onclick="createPanel()">CREATE PANEL</button>
-  <button onclick="logout()">LOGOUT</button>
-
-  <pre id="dashLog"></pre>
+<div class="box" id="panel">
+  <h2>PANEL</h2>
+  <button onclick="create()">CREATE PANEL</button>
+  <h3>LOG</h3>
+  <pre id="log"></pre>
 </div>
 
 <script>
 let token = "";
-const deviceId = navigator.userAgent + "-" + screen.width + "x" + screen.height;
+const device = navigator.userAgent;
 
-/* ===== UTIL ===== */
-function log(el, msg){
-  el.textContent += msg + "\n";
-  el.scrollTop = el.scrollHeight;
+function log(msg){
+  document.getElementById("log").textContent =
+    msg + "\n" + document.getElementById("log").textContent;
 }
 
-/* ===== LOGIN ===== */
 async function login(){
-  loginLog.textContent = "";
-  try{
-    const res = await fetch("/login", {
-      method:"POST",
-      headers:{"Content-Type":"application/json"},
-      body:JSON.stringify({
-        username: loginUser.value,
-        password: loginPass.value,
-        deviceId
-      })
-    });
-
-    const data = await res.json();
-    if(!res.ok) throw data;
-
-    token = data.token;
-
-    loginBox.classList.add("hidden");
-    dashboard.classList.remove("hidden");
-
-    log(dashLog, "Login berhasil");
-  }catch(e){
-    log(loginLog, "ERROR: " + JSON.stringify(e));
-  }
+  const r = await fetch("/login",{
+    method:"POST",
+    headers:{ "Content-Type":"application/json" },
+    body:JSON.stringify({
+      username:u.value,
+      password:p.value,
+      device
+    })
+  });
+  const d = await r.json();
+  if(d.error) return alert(d.error);
+  token = d.token;
+  login.style.display="none";
+  panel.style.display="block";
+  loadLogs();
 }
 
-/* ===== CREATE PANEL ===== */
-async function createPanel(){
-  try{
-    log(dashLog, "Membuat panel...");
-    const res = await fetch("/panel/create", {
-      method:"POST",
-      headers:{
-        "Content-Type":"application/json",
-        "Authorization":"Bearer " + token
-      },
-      body:JSON.stringify({
-        username: panelUser.value,
-        paket: paket.value
-      })
-    });
-
-    const data = await res.json();
-    if(!res.ok) throw data;
-
-    log(dashLog, JSON.stringify(data, null, 2));
-  }catch(e){
-    log(dashLog, "ERROR: " + JSON.stringify(e));
-  }
+async function create(){
+  const r = await fetch("/create-panel",{
+    method:"POST",
+    headers:{ Authorization:token }
+  });
+  const d = await r.json();
+  if(d.error) alert(d.error);
+  loadLogs();
 }
 
-/* ===== LOGOUT ===== */
-function logout(){
-  token = "";
-  dashboard.classList.add("hidden");
-  loginBox.classList.remove("hidden");
-  loginLog.textContent = "";
+async function loadLogs(){
+  const r = await fetch("/logs",{ headers:{ Authorization:token }});
+  const d = await r.json();
+  log(d.join("\n"));
 }
 </script>
 
 </body>
-                              </html>
+</html>
