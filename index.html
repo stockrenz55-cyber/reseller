@@ -9,7 +9,6 @@
 
 <style>
 *{box-sizing:border-box;font-family:'Poppins',sans-serif}
-
 body{
 margin:0;
 min-height:100vh;
@@ -21,7 +20,6 @@ align-items:center;
 justify-content:center;
 color:#fff
 }
-
 .glass{
 width:460px;
 padding:30px;
@@ -33,7 +31,6 @@ box-shadow:
 inset 0 0 20px rgba(0,255,255,.15);
 animation:fade .8s ease
 }
-
 .neon{
 text-align:center;
 color:#7df9ff;
@@ -42,7 +39,6 @@ text-shadow:
 0 0 20px #00ffff,
 0 0 40px #00ffff
 }
-
 input,select{
 width:100%;
 margin-top:12px;
@@ -54,9 +50,7 @@ color:#fff;
 outline:none;
 box-shadow:0 0 10px rgba(0,255,255,.3)
 }
-
 select option{background:#000}
-
 button{
 width:100%;
 margin-top:15px;
@@ -71,13 +65,11 @@ transition:.3s;
 text-shadow:0 0 5px #00ffff;
 box-shadow:0 0 15px rgba(0,255,255,.5)
 }
-
 button:hover{
 background:rgba(0,255,255,.15);
 box-shadow:0 0 30px #00ffff;
 transform:translateY(-2px)
 }
-
 .card{
 margin-top:20px;
 padding:16px;
@@ -87,9 +79,7 @@ border:1px solid rgba(0,255,255,.4);
 box-shadow:inset 0 0 15px rgba(0,255,255,.2);
 animation:slide .6s ease
 }
-
 .hidden{display:none}
-
 @keyframes fade{from{opacity:0;transform:scale(.9)}to{opacity:1}}
 @keyframes slide{from{opacity:0;transform:translateY(30px)}to{opacity:1}}
 </style>
@@ -111,7 +101,6 @@ animation:slide .6s ease
 
 <div class="card">
 <h3 class="neon">CREATE PANEL</h3>
-
 <input id="panelUser" placeholder="Username Panel">
 
 <select id="paket" onchange="updateSpec()">
@@ -140,13 +129,26 @@ CPU : <span id="rCpu"></span>
 </div>
 
 <div id="resultBox" class="card hidden"></div>
-
 <button onclick="logout()">LOGOUT</button>
 </div>
 
 <script>
+/* ================= ELEMENT ================= */
+const loginMsg = document.getElementById("loginMsg");
+const username = document.getElementById("username");
+const password = document.getElementById("password");
+const paket = document.getElementById("paket");
+const panelUser = document.getElementById("panelUser");
+const review = document.getElementById("review");
+const rRam = document.getElementById("rRam");
+const rDisk = document.getElementById("rDisk");
+const rCpu = document.getElementById("rCpu");
+const resultBox = document.getElementById("resultBox");
+const loginBox = document.getElementById("loginBox");
+const dashboard = document.getElementById("dashboard");
+
 /* ================= CONFIG ================= */
-const API = location.origin
+const API = "http://localhost:3000"; // ganti sesuai backend
 
 const specs = {
   "1gb":{ram:"1 GB",disk:"1 GB",cpu:"40%"},
@@ -192,6 +194,10 @@ function login(){
       loginMsg.innerText = d.msg || "Login gagal"
     }
   })
+  .catch(err=>{
+    loginMsg.innerText = "Gagal terhubung ke server"
+    console.error(err)
+  })
 }
 
 function authFetch(url,opt={}){
@@ -199,7 +205,7 @@ function authFetch(url,opt={}){
     ...opt,
     headers:{
       "Content-Type":"application/json",
-      "Authorization":localStorage.token
+      "Authorization":"Bearer "+localStorage.token
     }
   }).then(r=>r.json())
 }
@@ -227,7 +233,7 @@ function createPanel(){
       <b>RAM</b> : ${specs[paket.value].ram}<br>
       <b>Disk</b> : ${specs[paket.value].disk}<br>
       <b>CPU</b> : ${specs[paket.value].cpu}<br><br>
-      <a href="${d.panel_url}" target="_blank" style="color:#00ffff">
+      <a href="${d.panel_url || '#'}" target="_blank" style="color:#00ffff">
         OPEN PANEL
       </a>
     `
@@ -248,4 +254,4 @@ if(localStorage.token){
 </script>
 
 </body>
-</html>
+  </html>
