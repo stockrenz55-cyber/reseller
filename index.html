@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>Reseller Panel</title>
+<style>
+body {
+  background:url("https://images.unsplash.com/photo-1517816743773-6e0fd518b4a6") center/cover;
+  font-family: Arial;
+}
+.btn {
+  background: rgba(0,0,0,.4);
+  border: 1px solid cyan;
+  color: cyan;
+  padding: 10px;
+  width: 100%;
+  box-shadow: 0 0 15px cyan;
+  transition:.3s;
+}
+.btn:hover {
+  box-shadow: 0 0 30px cyan;
+  transform: scale(1.05);
+}
+.box {
+  width: 300px;
+  margin: 120px auto;
+  padding: 20px;
+  background: rgba(0,0,0,.6);
+  box-shadow: 0 0 40px cyan;
+}
+input {
+  width:100%;
+  padding:8px;
+  margin:5px 0;
+  background:transparent;
+  border:1px solid cyan;
+  color:cyan;
+}
+</style>
+</head>
+<body>
+
+<div class="box">
+  <h2 style="color:cyan">LOGIN PANEL</h2>
+  <input id="u" placeholder="Username Panel">
+  <input id="p" type="password" placeholder="Password Panel">
+  <button class="btn" onclick="login()">LOGIN</button>
+</div>
+
+<script>
+const fp = navigator.userAgent
+function login(){
+fetch("/login-panel",{
+method:"POST",
+headers:{ "Content-Type":"application/json" },
+body:JSON.stringify({
+username:u.value,
+password:p.value,
+fingerprint:fp
+})
+}).then(r=>r.json()).then(r=>alert(JSON.stringify(r)))
+}
+</script>
+
+</body>
+</html>
