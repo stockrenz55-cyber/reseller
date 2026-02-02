@@ -1,65 +1,81 @@
 <!DOCTYPE html>
-<html>
+<html lang="id">
 <head>
+<meta charset="UTF-8">
 <title>Reseller Panel</title>
 <style>
-body {
-  background:url("https://images.unsplash.com/photo-1517816743773-6e0fd518b4a6") center/cover;
-  font-family: Arial;
+body{
+  margin:0;
+  font-family:Poppins, sans-serif;
+  background:url("https://images.unsplash.com/photo-1518770660439-4636190af475") center/cover fixed;
+  color:#fff;
 }
-.btn {
-  background: rgba(0,0,0,.4);
-  border: 1px solid cyan;
-  color: cyan;
-  padding: 10px;
-  width: 100%;
-  box-shadow: 0 0 15px cyan;
+.card{
+  backdrop-filter: blur(15px);
+  background: rgba(0,0,0,.5);
+  border:1px solid #0ff;
+  box-shadow:0 0 20px #0ff;
+  border-radius:12px;
+  padding:20px;
+  width:320px;
+  margin:80px auto;
+  animation: neon 2s infinite alternate;
+}
+@keyframes neon{
+  from{box-shadow:0 0 10px #0ff;}
+  to{box-shadow:0 0 30px #0ff;}
+}
+button{
+  width:100%;
+  padding:12px;
+  margin-top:10px;
+  background:rgba(0,255,255,.2);
+  border:1px solid #0ff;
+  color:#0ff;
+  cursor:pointer;
   transition:.3s;
 }
-.btn:hover {
-  box-shadow: 0 0 30px cyan;
-  transform: scale(1.05);
+button:hover{
+  background:#0ff;
+  color:#000;
 }
-.box {
-  width: 300px;
-  margin: 120px auto;
-  padding: 20px;
-  background: rgba(0,0,0,.6);
-  box-shadow: 0 0 40px cyan;
-}
-input {
+input{
   width:100%;
-  padding:8px;
-  margin:5px 0;
-  background:transparent;
-  border:1px solid cyan;
-  color:cyan;
+  padding:10px;
+  margin-top:8px;
+  background:rgba(0,0,0,.6);
+  border:1px solid #0ff;
+  color:#0ff;
 }
 </style>
 </head>
 <body>
 
-<div class="box">
-  <h2 style="color:cyan">LOGIN PANEL</h2>
-  <input id="u" placeholder="Username Panel">
-  <input id="p" type="password" placeholder="Password Panel">
-  <button class="btn" onclick="login()">LOGIN</button>
+<div class="card">
+  <h2>Login Reseller</h2>
+  <input id="user" placeholder="Username">
+  <input id="pass" type="password" placeholder="Password">
+  <button onclick="login()">LOGIN</button>
 </div>
 
 <script>
-const fp = navigator.userAgent
-function login(){
-fetch("/login-panel",{
-method:"POST",
-headers:{ "Content-Type":"application/json" },
-body:JSON.stringify({
-username:u.value,
-password:p.value,
-fingerprint:fp
-})
-}).then(r=>r.json()).then(r=>alert(JSON.stringify(r)))
+function fingerprint(){
+  return btoa(navigator.userAgent + screen.width + screen.height);
+}
+async function login(){
+  const r = await fetch("/api/login",{
+    method:"POST",
+    headers:{"Content-Type":"application/json"},
+    body:JSON.stringify({
+      username:user.value,
+      password:pass.value,
+      device:fingerprint()
+    })
+  });
+  const j = await r.json();
+  alert(JSON.stringify(j));
 }
 </script>
 
 </body>
-</html>
+    </html>
