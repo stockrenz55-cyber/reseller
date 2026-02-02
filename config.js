@@ -1,12 +1,20 @@
 module.exports = {
   PORT: 3000,
-  JWT_SECRET: "GANTI_SECRET_INI",
 
-  domain: "https://nyxostudio.web.id",
-  apikey: "ptla_mIoA2uJSLrSVm0r3l21x2wTjQee9ZpCR5YjifRufQue",
-  capikey: "ptlc_0nPji2uEXI9WuSU6mRmBwwyG8C1TV2yen0eTGkO52Vc",
+  // GANTI & JANGAN SEBAR
+  JWT_SECRET: "GANTI_DENGAN_SECRET_PANJANG_RANDOM",
 
-  egg: 15,
-  nestid: 5,
-  loc: 1
+  OWNER: {
+    username: "owner",
+    password: "owner123"
+  },
+
+  PTERO: {
+    DOMAIN: "https://nyxostudio.web.id",
+    API_KEY: "ptla_mIoA2uJSLrSVm0r3l21x2wTjQee9ZpCR5YjifRufQue",
+    CLIENT_KEY: "ptlc_0nPji2uEXI9WuSU6mRmBwwyG8C1TV2yen0eTGkO52Vc",
+    EGG: 15,
+    NEST: 5,
+    LOC: 1
+  }
 };
