@@ -1,81 +1,81 @@
 <!DOCTYPE html>
-<html lang="id">
+<html>
 <head>
-<meta charset="UTF-8">
+<meta charset="utf-8">
 <title>Reseller Panel</title>
 <style>
 body{
-  margin:0;
-  font-family:Poppins, sans-serif;
-  background:url("https://images.unsplash.com/photo-1518770660439-4636190af475") center/cover fixed;
-  color:#fff;
+  background:url("https://images.unsplash.com/photo-1517816743773-6e0fd518b4a6");
+  background-size:cover;
+  font-family:sans-serif;
 }
-.card{
-  backdrop-filter: blur(15px);
-  background: rgba(0,0,0,.5);
-  border:1px solid #0ff;
-  box-shadow:0 0 20px #0ff;
-  border-radius:12px;
-  padding:20px;
-  width:320px;
+.box{
+  width:340px;
   margin:80px auto;
-  animation: neon 2s infinite alternate;
+  padding:20px;
+  backdrop-filter:blur(15px);
+  background:rgba(0,0,0,.5);
+  border-radius:15px;
+  box-shadow:0 0 25px cyan;
 }
-@keyframes neon{
-  from{box-shadow:0 0 10px #0ff;}
-  to{box-shadow:0 0 30px #0ff;}
-}
-button{
-  width:100%;
-  padding:12px;
-  margin-top:10px;
-  background:rgba(0,255,255,.2);
-  border:1px solid #0ff;
-  color:#0ff;
-  cursor:pointer;
-  transition:.3s;
-}
-button:hover{
-  background:#0ff;
-  color:#000;
-}
-input{
+input,select,button{
   width:100%;
   padding:10px;
-  margin-top:8px;
-  background:rgba(0,0,0,.6);
-  border:1px solid #0ff;
-  color:#0ff;
+  margin:6px 0;
+  border-radius:10px;
+  border:none;
 }
+button{
+  background:transparent;
+  color:cyan;
+  border:1px solid cyan;
+  box-shadow:0 0 10px cyan;
+}
+button:hover{box-shadow:0 0 20px cyan}
 </style>
 </head>
 <body>
 
-<div class="card">
-  <h2>Login Reseller</h2>
-  <input id="user" placeholder="Username">
-  <input id="pass" type="password" placeholder="Password">
-  <button onclick="login()">LOGIN</button>
+<div class="box">
+<h3 style="color:cyan">LOGIN</h3>
+<input id="u" placeholder="Username">
+<input id="p" type="password" placeholder="Password">
+<button onclick="login()">LOGIN</button>
+
+<hr>
+
+<h3 style="color:cyan">CREATE PANEL</h3>
+<input id="pu" placeholder="Username Panel">
+<select id="paket">
+<option>1gb</option><option>2gb</option><option>3gb</option>
+<option>4gb</option><option>5gb</option>
+<option>6gb</option><option>7gb</option>
+<option>8gb</option><option>9gb</option>
+<option>10gb</option><option>unlimited</option>
+</select>
+<button onclick="create()">CREATE</button>
 </div>
 
 <script>
-function fingerprint(){
-  return btoa(navigator.userAgent + screen.width + screen.height);
-}
+let token="";
+const deviceId=navigator.userAgent+screen.width;
+
 async function login(){
-  const r = await fetch("/api/login",{
-    method:"POST",
-    headers:{"Content-Type":"application/json"},
-    body:JSON.stringify({
-      username:user.value,
-      password:pass.value,
-      device:fingerprint()
-    })
-  });
-  const j = await r.json();
-  alert(JSON.stringify(j));
+  const r=await fetch("/login",{method:"POST",headers:{"Content-Type":"application/json"},
+  body:JSON.stringify({username:u.value,password:p.value,deviceId})});
+  const d=await r.json();
+  if(!r.ok)return alert(d.msg);
+  token=d.token;
+  alert("Login sukses");
+}
+
+async function create(){
+  const r=await fetch("/panel/create",{method:"POST",
+  headers:{Authorization:"Bearer "+token,"Content-Type":"application/json"},
+  body:JSON.stringify({username:pu.value,paket:paket.value})});
+  alert(JSON.stringify(await r.json(),null,2));
 }
 </script>
 
 </body>
-    </html>
+</html>
