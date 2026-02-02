@@ -2,11 +2,8 @@ module.exports = {
   egg: 15,
   nestid: 5,
   loc: 1,
-
   domain: "https://nyxostudio.web.id",
   apikey: "ptla_mIoA2uJSLrSVm0r3l21x2wTjQee9ZpCR5YjifRufQue",
-  capikey: "ptlc_0nPji2uEXI9WuSU6mRmBwwyG8C1TV2yen0eTGkO52Vc",
-
   resourceMap: {
     "1gb": { ram: 1000, disk: 1000, cpu: 40 },
     "2gb": { ram: 2000, disk: 1000, cpu: 60 },
@@ -20,4 +17,4 @@ module.exports = {
     "10gb": { ram: 10000, disk: 5000, cpu: 220 },
     "unlimited": { ram: 0, disk: 0, cpu: 0 }
   }
-}
+};
