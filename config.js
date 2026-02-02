@@ -1,9 +1,11 @@
+// config.js
 module.exports = {
-  egg: 15,
-  nestid: 5,
-  loc: 1,
-  domain: "https://nyxostudio.web.id",
-  apikey: "ptla_mIoA2uJSLrSVm0r3l21x2wTjQee9ZpCR5YjifRufQue",
+  domain: "https://nyxostudio.web.id", // Ganti dengan domain Pterodactyl kamu
+  apikey: "ptla_mIoA2uJSLrSVm0r3l21x2wTjQee9ZpCR5YjifRufQue",          // Pastikan pakai admin API key
+  capikey: "ptlc_0nPji2uEXI9WuSU6mRmBwwyG8C1TV2yen0eTGkO52Vc",        // Opsional, client key
+  egg: 15,        // ID Egg (sesuaikan)
+  nestid: 5,      // ID Nest (sesuaikan)
+  loc: 1,         // Location ID Ptero
   resourceMap: {
     "1gb": { ram: 1000, disk: 1000, cpu: 40 },
     "2gb": { ram: 2000, disk: 1000, cpu: 60 },
