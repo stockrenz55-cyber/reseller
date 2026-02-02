@@ -1,16 +1,27 @@
 module.exports = {
-  web: {
+  app: {
     port: 3000,
-    sessionExpire: 24 * 60 * 60 * 1000
+    sessionSecret: "super-secret-neon-session",
   },
 
   pterodactyl: {
     domain: "https://nyxostudio.web.id",
     apikey: "ptla_mIoA2uJSLrSVm0r3l21x2wTjQee9ZpCR5YjifRufQue",
     capikey: "ptlc_0nPji2uEXI9WuSU6mRmBwwyG8C1TV2yen0eTGkO52Vc",
-    nestid: 1,
     egg: 15,
-    location: 1,
-    docker: "ghcr.io/parkervcp/yolks:nodejs_20"
+    nestid: 5,
+    loc: 1,
+  },
+
+  roles: {
+    OWNER: "owner",
+    ADMIN: "admin",
+    RESELLER: "reseller",
+  },
+
+  permissions: {
+    owner: ["create_user", "delete_user", "create_panel", "delete_panel", "list_panel"],
+    admin: ["create_user", "create_panel", "delete_panel", "list_panel"],
+    reseller: ["create_panel", "list_panel"],
   }
-}
+};
