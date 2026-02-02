@@ -5,23 +5,23 @@
 <title>Reseller Panel</title>
 <style>
 body{
-  background:url("https://images.unsplash.com/photo-1517816743773-6e0fd518b4a6");
+  background:url("https://images.unsplash.com/photo-1535223289827-42f1e9919769");
   background-size:cover;
   font-family:sans-serif;
 }
-.box{
-  width:340px;
-  margin:80px auto;
+.card{
+  width:360px;
+  margin:60px auto;
   padding:20px;
-  backdrop-filter:blur(15px);
-  background:rgba(0,0,0,.5);
+  backdrop-filter:blur(16px);
+  background:rgba(0,0,0,.55);
   border-radius:15px;
-  box-shadow:0 0 25px cyan;
+  box-shadow:0 0 30px cyan;
 }
 input,select,button{
   width:100%;
-  padding:10px;
   margin:6px 0;
+  padding:10px;
   border-radius:10px;
   border:none;
 }
@@ -29,14 +29,15 @@ button{
   background:transparent;
   color:cyan;
   border:1px solid cyan;
-  box-shadow:0 0 10px cyan;
+  box-shadow:0 0 12px cyan;
 }
-button:hover{box-shadow:0 0 20px cyan}
+button:hover{box-shadow:0 0 25px cyan}
+pre{color:#0ff;font-size:12px;max-height:200px;overflow:auto}
 </style>
 </head>
 <body>
 
-<div class="box">
+<div class="card">
 <h3 style="color:cyan">LOGIN</h3>
 <input id="u" placeholder="Username">
 <input id="p" type="password" placeholder="Password">
@@ -53,27 +54,34 @@ button:hover{box-shadow:0 0 20px cyan}
 <option>8gb</option><option>9gb</option>
 <option>10gb</option><option>unlimited</option>
 </select>
-<button onclick="create()">CREATE</button>
+<button onclick="createPanel()">CREATE</button>
+
+<pre id="log"></pre>
 </div>
 
 <script>
 let token="";
-const deviceId=navigator.userAgent+screen.width;
+const deviceId=navigator.userAgent+screen.width+screen.height;
+
+function log(msg){logEl.textContent+=msg+"\n"}
 
 async function login(){
-  const r=await fetch("/login",{method:"POST",headers:{"Content-Type":"application/json"},
+  log("Login...");
+  const r=await fetch("/login",{method:"POST",
+  headers:{"Content-Type":"application/json"},
   body:JSON.stringify({username:u.value,password:p.value,deviceId})});
   const d=await r.json();
-  if(!r.ok)return alert(d.msg);
+  if(!r.ok)return log("ERROR: "+JSON.stringify(d));
   token=d.token;
-  alert("Login sukses");
+  log("Login sukses");
 }
 
-async function create(){
+async function createPanel(){
+  log("Create panel...");
   const r=await fetch("/panel/create",{method:"POST",
   headers:{Authorization:"Bearer "+token,"Content-Type":"application/json"},
   body:JSON.stringify({username:pu.value,paket:paket.value})});
-  alert(JSON.stringify(await r.json(),null,2));
+  log(JSON.stringify(await r.json(),null,2));
 }
 </script>
 
