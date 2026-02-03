@@ -119,22 +119,10 @@ button:hover{
   <button onclick="buatPanel()">CREATE PANEL</button>
 </div>
 
-<script src="config.js"></script>
-
 <script>
-const resourceMap = {
-  "1gb": { ram:1000, disk:1000, cpu:40 },
-  "2gb": { ram:2000, disk:1000, cpu:60 },
-  "3gb": { ram:3000, disk:2000, cpu:80 },
-  "4gb": { ram:4000, disk:2000, cpu:100 },
-  "5gb": { ram:5000, disk:3000, cpu:120 },
-  "unlimited": { ram:0, disk:0, cpu:0 }
-};
-
-function buatPanel(){
+async function buatPanel(){
   const user = document.getElementById("username").value.toLowerCase();
   const paket = document.getElementById("paket").value;
-  const res = resourceMap[paket];
 
   if(!user){
     alert("Username wajib diisi!");
@@ -145,29 +133,51 @@ function buatPanel(){
   document.getElementById("app").innerHTML = `
     <div class="status">
       <h1>⏳ CREATING PANEL</h1>
-      <p>Mohon tunggu...</p>
+      <p>Mohon tunggu, server sedang dibuat...</p>
     </div>
   `;
 
-  setTimeout(() => {
-    // MODE SUCCESS / DATA TERKIRIM
+  try {
+    const res = await fetch("/create-panel", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify({
+        username: user,
+        paket: paket
+      })
+    });
+
+    const data = await res.json();
+
+    if(!data.success){
+      throw new Error(data.error || "Gagal create panel");
+    }
+
+    // MODE SUCCESS (DATA ASLI DARI SERVER)
     document.getElementById("app").innerHTML = `
       <div class="status">
         <h1>✅ PANEL BERHASIL</h1>
         <div class="success">
-Username : ${user}
-Password : ${user}001
-RAM      : ${res.ram==0?"Unlimited":res.ram/1000+"GB"}
-Disk     : ${res.disk==0?"Unlimited":res.disk/1000+"GB"}
-CPU      : ${res.cpu==0?"Unlimited":res.cpu+"%"}
-Panel    : ${CONFIG.domain}
+Username : ${data.username}
+Password : ${data.password}
+RAM      : ${data.spec.ram == 0 ? "Unlimited" : data.spec.ram/1000 + "GB"}
+Disk     : ${data.spec.disk == 0 ? "Unlimited" : data.spec.disk/1000 + "GB"}
+CPU      : ${data.spec.cpu == 0 ? "Unlimited" : data.spec.cpu + "%"}
+Panel    : ${data.panel}
+ServerID : ${data.server_id}
         </div>
         <button onclick="location.reload()">BUAT PANEL LAGI</button>
       </div>
     `;
-  }, 2000);
+
+  } catch (err){
+    alert("ERROR: " + err.message);
+    location.reload();
+  }
 }
 </script>
 
 </body>
-</html>
+  </html>
