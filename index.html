@@ -3,33 +3,37 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Panel Creator Pro</title>
-    <!-- Google Fonts -->
-    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <title>Neon Panel Creator</title>
+    <!-- Google Fonts: Plus Jakarta Sans untuk tampilan Modern -->
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <!-- Phosphor Icons -->
     <script src="https://unpkg.com/@phosphor-icons/web"></script>
 
     <style>
         /* ==================== CSS VARIABLES & RESET ==================== */
         :root {
-            --bg-overlay: rgba(15, 23, 42, 0.6);
-            --glass-bg: rgba(30, 41, 59, 0.7);
-            --glass-border: rgba(255, 255, 255, 0.08);
-            --primary: #8b5cf6; /* Violet */
-            --primary-hover: #7c3aed;
-            --text-main: #f8fafc;
+            --bg-overlay: rgba(10, 10, 15, 0.85);
+            --glass-bg: rgba(255, 255, 255, 0.03);
+            --glass-border: rgba(255, 255, 255, 0.1);
+            --glass-highlight: rgba(255, 255, 255, 0.05);
+            
+            /* NEON THEME */
+            --primary: #a855f7; /* Neon Purple */
+            --primary-glow: rgba(168, 85, 247, 0.6);
+            --secondary: #06b6d4; /* Cyan Accent */
+            
+            --text-main: #ffffff;
             --text-muted: #94a3b8;
             --success: #10b981;
             --danger: #ef4444;
-            --shadow-lg: 0 10px 25px -5px rgba(0, 0, 0, 0.5);
         }
 
-        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Poppins', sans-serif; }
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Plus Jakarta Sans', sans-serif; }
         
         body {
             min-height: 100vh;
-            /* Background Full Cover */
-            background: url('https://picsum.photos/seed/server/1920/1080') no-repeat center center fixed;
+            /* Background Modern Dark Tech */
+            background: url('https://picsum.photos/seed/techneon/1920/1080') no-repeat center center fixed;
             background-size: cover;
             display: flex;
             justify-content: center;
@@ -39,130 +43,203 @@
             padding: 20px;
         }
 
-        /* Overlay Gelap */
+        /* Overlay Gelap lebih intens agar neon terlihat jelas */
         body::before {
             content: '';
             position: fixed; top: 0; left: 0; right: 0; bottom: 0;
-            background: var(--bg-overlay);
-            backdrop-filter: blur(8px);
+            background: rgba(0, 0, 0, 0.85);
+            backdrop-filter: blur(12px);
             z-index: -1;
         }
 
-        /* ==================== MAIN CONTAINER ==================== */
+        /* ==================== MAIN CONTAINER (NEON GLASS) ==================== */
         .glass-card {
             width: 100%;
-            max-width: 450px;
+            max-width: 480px;
             background: var(--glass-bg);
+            /* Border tipis transparan */
             border: 1px solid var(--glass-border);
-            border-radius: 20px;
-            padding: 2rem;
-            box-shadow: var(--shadow-lg);
-            backdrop-filter: blur(12px);
-            -webkit-backdrop-filter: blur(12px);
-            animation: slideUp 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+            border-radius: 24px;
+            padding: 2.5rem;
+            box-shadow: 0 0 40px rgba(0,0,0,0.6), inset 0 0 0 1px rgba(255,255,255,0.05);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            animation: fadeInCard 0.8s cubic-bezier(0.2, 0.8, 0.2, 1);
             position: relative;
-            overflow: hidden;
+        }
+
+        /* Garis Neon halus di pinggir kartu */
+        .glass-card::after {
+            content: '';
+            position: absolute;
+            top: 0; left: 0; right: 0; bottom: 0;
+            border-radius: 24px;
+            box-shadow: 0 0 20px rgba(168, 85, 247, 0.1);
+            pointer-events: none;
+            z-index: -1;
         }
 
         .header {
             text-align: center;
-            margin-bottom: 2rem;
+            margin-bottom: 2.5rem;
         }
 
-        .header h1 { font-size: 1.8rem; font-weight: 700; margin-bottom: 0.5rem; letter-spacing: -0.5px; }
-        .header p { color: var(--text-muted); font-size: 0.9rem; }
+        .header h1 { 
+            font-size: 2rem; 
+            font-weight: 800; 
+            background: linear-gradient(135deg, #fff, var(--primary));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 0.5rem; 
+            text-shadow: 0 0 30px var(--primary-glow);
+        }
+        .header p { color: var(--text-muted); font-size: 0.9rem; letter-spacing: 0.5px; }
 
         /* ==================== FORM ELEMENTS ==================== */
-        .form-group { margin-bottom: 1.5rem; position: relative; }
+        .form-group { margin-bottom: 1.8rem; position: relative; }
         
-        label { display: block; margin-bottom: 0.5rem; font-size: 0.85rem; font-weight: 500; color: var(--text-muted); }
+        label { 
+            display: block; 
+            margin-bottom: 0.6rem; 
+            font-size: 0.85rem; 
+            font-weight: 600; 
+            color: var(--text-muted); 
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
 
         input {
             width: 100%;
-            padding: 12px 15px;
-            background: rgba(0, 0, 0, 0.2);
+            padding: 14px 16px;
+            background: rgba(0, 0, 0, 0.3);
             border: 1px solid var(--glass-border);
-            border-radius: 10px;
+            border-radius: 12px;
             color: #fff;
-            font-size: 0.95rem;
+            font-size: 1rem;
             transition: all 0.3s ease;
             outline: none;
         }
 
         input:focus {
             border-color: var(--primary);
-            box-shadow: 0 0 0 2px rgba(139, 92, 246, 0.2);
-            background: rgba(0, 0, 0, 0.4);
+            background: rgba(0, 0, 0, 0.5);
+            box-shadow: 0 0 15px rgba(168, 85, 247, 0.2);
         }
 
-        /* Custom Dropdown Scrollable */
+        /* Custom Dropdown */
         .dropdown-container { position: relative; }
         
         .dropdown-btn {
             width: 100%;
-            padding: 12px 15px;
-            background: rgba(0, 0, 0, 0.2);
+            padding: 14px 16px;
+            background: rgba(0, 0, 0, 0.3);
             border: 1px solid var(--glass-border);
-            border-radius: 10px;
+            border-radius: 12px;
             color: #fff;
             cursor: pointer;
             display: flex;
             justify-content: space-between;
             align-items: center;
-            user-select: none;
             transition: 0.3s;
         }
-        .dropdown-btn:hover, .dropdown-btn.active { border-color: var(--primary); }
+        .dropdown-btn:hover, .dropdown-btn.active { 
+            border-color: var(--primary);
+            box-shadow: 0 0 10px rgba(168, 85, 247, 0.1);
+        }
 
         .dropdown-menu {
             position: absolute;
-            top: 110%; left: 0; right: 0;
-            background: #1e293b;
+            top: 115%; left: 0; right: 0;
+            background: #0f172a;
             border: 1px solid var(--glass-border);
-            border-radius: 10px;
+            border-radius: 12px;
             max-height: 0;
             overflow-y: auto;
             transition: max-height 0.3s ease-in-out, opacity 0.3s;
             opacity: 0;
-            z-index: 10;
-            box-shadow: var(--shadow-lg);
+            z-index: 20;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
         }
         
-        .dropdown-menu.show { max-height: 200px; opacity: 1; overflow-y: scroll; }
+        .dropdown-menu.show { max-height: 250px; opacity: 1; padding: 5px; overflow-y: scroll; }
         
         .dropdown-item {
-            padding: 10px 15px;
+            padding: 12px;
             cursor: pointer;
             transition: 0.2s;
+            border-radius: 8px;
             display: flex;
             justify-content: space-between;
-            border-bottom: 1px solid rgba(255,255,255,0.05);
+            color: var(--text-muted);
         }
-        .dropdown-item:hover { background: var(--primary); color: #fff; }
-        .dropdown-item:last-child { border-bottom: none; }
-        .dropdown-item span.spec-detail { font-size: 0.75rem; opacity: 0.7; }
+        .dropdown-item:hover { 
+            background: rgba(168, 85, 247, 0.2); 
+            color: #fff; 
+            box-shadow: 0 0 10px rgba(168, 85, 247, 0.1);
+        }
+        .dropdown-item span.spec-detail { font-size: 0.75rem; opacity: 0.6; }
 
-        /* Tombol Utama */
+        /* ==================== NEON BUTTONS ==================== */
         .btn-submit {
             width: 100%;
-            padding: 14px;
+            padding: 16px;
             margin-top: 1rem;
-            background: linear-gradient(135deg, var(--primary), #6366f1);
-            border: none;
-            border-radius: 10px;
-            color: white;
-            font-weight: 600;
+            background: transparent; /* TRANSPARENT BUTTON */
+            border: 1px solid var(--primary);
+            border-radius: 12px;
+            color: var(--primary);
+            font-weight: 700;
+            font-size: 1rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
             cursor: pointer;
             position: relative;
             overflow: hidden;
-            transition: transform 0.2s;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            
+            /* Neon Glow Effect */
+            box-shadow: 0 0 10px var(--primary-glow);
+            text-shadow: 0 0 5px var(--primary);
+        }
+
+        .btn-submit:hover {
+            background: var(--primary);
+            color: #fff;
+            box-shadow: 0 0 25px var(--primary-glow), 0 0 50px var(--primary-glow);
+            transform: translateY(-2px);
+        }
+        
+        .btn-submit:active { transform: scale(0.98); }
+
+        /* Action Buttons (Copy, Open) */
+        .btn-action {
+            padding: 12px;
+            border-radius: 10px;
+            border: 1px solid rgba(255,255,255,0.2);
+            background: rgba(255,255,255,0.02);
+            cursor: pointer;
+            font-size: 0.9rem;
+            font-weight: 600;
             display: flex;
             align-items: center;
             justify-content: center;
             gap: 8px;
+            transition: 0.3s;
+            text-decoration: none;
+            color: #fff;
+            width: 100%;
         }
-        .btn-submit:hover { transform: translateY(-2px); box-shadow: 0 4px 15px rgba(139, 92, 246, 0.4); }
-        .btn-submit:active { transform: translateY(0); }
+        
+        .btn-action:hover {
+            border-color: var(--secondary);
+            box-shadow: 0 0 15px rgba(6, 182, 212, 0.3);
+            background: rgba(6, 182, 212, 0.1);
+            color: var(--secondary);
+        }
 
         /* Ripple Effect */
         .ripple {
@@ -170,94 +247,74 @@
             border-radius: 50%;
             transform: scale(0);
             animation: ripple 0.6s linear;
-            background-color: rgba(255, 255, 255, 0.3);
+            background-color: rgba(255, 255, 255, 0.2);
             pointer-events: none;
         }
         @keyframes ripple { to { transform: scale(4); opacity: 0; } }
 
         /* ==================== RESULT CARD ==================== */
-        .result-container {
-            display: none; /* Hidden by default */
-            animation: fadeIn 0.5s ease;
-            margin-top: 1rem;
-        }
+        .result-container { display: none; animation: slideUp 0.6s cubic-bezier(0.16, 1, 0.3, 1); }
 
         .result-card {
-            background: rgba(16, 185, 129, 0.1); /* Green tint background */
-            border: 1px solid rgba(16, 185, 129, 0.3);
-            border-radius: 15px;
-            padding: 1.5rem;
+            background: rgba(16, 185, 129, 0.05);
+            border: 1px solid rgba(16, 185, 129, 0.2);
+            border-radius: 16px;
+            padding: 2rem;
             text-align: center;
+            box-shadow: 0 0 30px rgba(16, 185, 129, 0.05);
         }
 
-        .success-icon { color: var(--success); font-size: 3rem; margin-bottom: 0.5rem; animation: popIn 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
+        .success-icon { 
+            color: var(--success); 
+            font-size: 4rem; 
+            margin-bottom: 1rem; 
+            filter: drop-shadow(0 0 10px rgba(16, 185, 129, 0.4));
+            animation: popIn 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275); 
+        }
 
         .info-grid {
             display: grid;
             grid-template-columns: 1fr 1fr;
-            gap: 10px;
-            margin: 1.5rem 0;
-            text-align: left;
+            gap: 12px;
+            margin: 2rem 0;
         }
 
         .info-box {
             background: rgba(0,0,0,0.3);
-            padding: 10px;
-            border-radius: 8px;
+            border: 1px solid var(--glass-border);
+            padding: 12px;
+            border-radius: 10px;
         }
-        .info-label { font-size: 0.7rem; color: var(--text-muted); display: block; margin-bottom: 2px; }
-        .info-value { font-size: 0.9rem; font-weight: 600; color: #fff; word-break: break-all; }
+        .info-label { font-size: 0.7rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px; display: block; margin-bottom: 4px; }
+        .info-value { font-size: 0.95rem; font-weight: 600; color: #fff; word-break: break-all; }
         
         .specs-display {
             display: flex;
-            justify-content: space-around;
-            margin-bottom: 1.5rem;
-            background: rgba(255,255,255,0.05);
-            padding: 10px;
-            border-radius: 8px;
+            justify-content: space-between;
+            margin-bottom: 2rem;
+            background: rgba(255,255,255,0.03);
+            padding: 15px;
+            border-radius: 12px;
+            border: 1px solid var(--glass-border);
         }
-        .spec-item { text-align: center; }
-        .spec-val { font-weight: bold; color: var(--primary); display: block; }
-        .spec-txt { font-size: 0.7rem; color: var(--text-muted); }
+        .spec-item { text-align: center; flex: 1; }
+        .spec-val { font-weight: bold; color: var(--primary); font-size: 1.1rem; display: block; text-shadow: 0 0 10px var(--primary-glow); }
+        .spec-txt { font-size: 0.75rem; color: var(--text-muted); }
 
-        .actions {
-            display: flex;
-            gap: 10px;
-            flex-direction: column;
-        }
-
-        .btn-action {
-            padding: 10px;
-            border-radius: 8px;
-            border: none;
-            cursor: pointer;
-            font-size: 0.9rem;
-            font-weight: 500;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 8px;
-            transition: 0.2s;
-            text-decoration: none;
-            color: white;
-        }
-        
-        .btn-copy { background: rgba(255,255,255,0.1); }
-        .btn-copy:hover { background: rgba(255,255,255,0.2); }
-        
-        .btn-open { background: var(--primary); }
-        .btn-open:hover { background: var(--primary-hover); }
+        .actions { display: flex; gap: 12px; flex-direction: column; }
 
         .btn-reset {
-            background: none; border: none; color: var(--text-muted); margin-top: 15px;
+            background: none; border: none; color: var(--text-muted); margin-top: 20px;
             text-decoration: underline; cursor: pointer; font-size: 0.85rem;
+            opacity: 0.7; transition: 0.3s;
         }
+        .btn-reset:hover { opacity: 1; color: #fff; }
 
         /* ==================== LOADING & TOAST ==================== */
         .loading-overlay {
             position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(0,0,0,0.8);
-            backdrop-filter: blur(5px);
+            background: rgba(0,0,0,0.9);
+            backdrop-filter: blur(10px);
             z-index: 100;
             display: none;
             flex-direction: column;
@@ -266,37 +323,42 @@
         }
 
         .spinner {
-            width: 50px; height: 50px;
-            border: 4px solid rgba(255,255,255,0.1);
-            border-left-color: var(--primary);
+            width: 60px; height: 60px;
+            border: 3px solid rgba(255,255,255,0.1);
+            border-top-color: var(--primary);
             border-radius: 50%;
             animation: spin 1s linear infinite;
-            margin-bottom: 15px;
+            margin-bottom: 20px;
+            box-shadow: 0 0 15px var(--primary-glow);
         }
 
         .toast-container {
-            position: fixed; top: 20px; right: 20px; z-index: 999;
-            display: flex; flex-direction: column; gap: 10px;
+            position: fixed; top: 30px; right: 30px; z-index: 999;
+            display: flex; flex-direction: column; gap: 15px;
         }
         .toast {
-            background: #1e293b; color: #fff;
-            padding: 12px 20px; border-radius: 8px;
-            box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+            background: rgba(15, 23, 42, 0.9);
+            border: 1px solid var(--glass-border);
+            color: #fff;
+            padding: 16px 24px; border-radius: 12px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
             border-left: 4px solid var(--primary);
             font-size: 0.9rem;
+            backdrop-filter: blur(10px);
             transform: translateX(120%);
-            transition: transform 0.4s ease;
-            display: flex; align-items: center; gap: 10px;
+            transition: transform 0.5s cubic-bezier(0.68, -0.55, 0.27, 1.55);
+            display: flex; align-items: center; gap: 12px;
+            max-width: 350px;
         }
         .toast.show { transform: translateX(0); }
-        .toast.error { border-color: var(--danger); }
-        .toast.success { border-color: var(--success); }
+        .toast.error { border-color: var(--danger); box-shadow: 0 0 20px rgba(239, 68, 68, 0.3); }
+        .toast.success { border-color: var(--success); box-shadow: 0 0 20px rgba(16, 185, 129, 0.3); }
 
         /* ==================== ANIMATIONS ==================== */
         @keyframes spin { 100% { transform: rotate(360deg); } }
-        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
-        @keyframes slideUp { from { opacity: 0; transform: translateY(30px); } to { opacity: 1; transform: translateY(0); } }
+        @keyframes slideUp { from { opacity: 0; transform: translateY(40px); } to { opacity: 1; transform: translateY(0); } }
         @keyframes popIn { 0% { transform: scale(0); } 80% { transform: scale(1.1); } 100% { transform: scale(1); } }
+        @keyframes fadeInCard { from { opacity: 0; transform: scale(0.95); } to { opacity: 1; transform: scale(1); } }
 
     </style>
 </head>
@@ -305,7 +367,7 @@
     <!-- Loading Overlay -->
     <div id="loading-overlay" class="loading-overlay">
         <div class="spinner"></div>
-        <div style="font-weight: 500;">Sedang Membuat Panel...</div>
+        <div style="font-weight: 600; letter-spacing: 1px;">MEMPROSES PANEL...</div>
     </div>
 
     <!-- Toast Notifications -->
@@ -317,20 +379,20 @@
         <!-- FORM INPUT SECTION -->
         <div id="form-section">
             <div class="header">
-                <h1>Create Panel</h1>
-                <p>Generate Pterodactyl Server Otomatis</p>
+                <h1>PANEL CREATOR</h1>
+                <p>Automated Pterodactyl System</p>
             </div>
 
             <div class="form-group">
-                <label>Username <span style="color:var(--danger)">*</span></label>
-                <input type="text" id="username" placeholder="Masukkan username..." autocomplete="off">
+                <label>Username</label>
+                <input type="text" id="username" placeholder="ex: user123" autocomplete="off">
             </div>
 
             <div class="form-group">
-                <label>Pilih Spesifikasi</label>
+                <label>Server Specification</label>
                 <div class="dropdown-container">
                     <div class="dropdown-btn" id="ram-dropdown-btn">
-                        <span id="selected-ram-text">Pilih RAM</span>
+                        <span id="selected-ram-text">Select RAM Package</span>
                         <i class="ph ph-caret-down"></i>
                     </div>
                     <div class="dropdown-menu" id="ram-menu">
@@ -340,7 +402,7 @@
             </div>
 
             <button class="btn-submit" id="create-btn">
-                <i class="ph ph-plus-circle"></i> Buat Panel Sekarang
+                <i class="ph ph-rocket-launch" style="font-size:1.2rem;"></i> CREATE SERVER
             </button>
         </div>
 
@@ -348,8 +410,8 @@
         <div id="result-section" class="result-container">
             <div class="result-card">
                 <i class="ph ph-check-circle success-icon"></i>
-                <h2 style="margin-bottom: 5px;">Berhasil!</h2>
-                <p style="font-size: 0.85rem; color: var(--text-muted);">Panel telah aktif dan siap digunakan.</p>
+                <h2 style="margin-bottom: 5px; font-weight: 700;">ACTIVATED</h2>
+                <p style="font-size: 0.85rem; color: var(--text-muted);">Server successfully deployed.</p>
 
                 <div class="specs-display">
                     <div class="spec-item">
@@ -358,7 +420,7 @@
                     </div>
                     <div class="spec-item">
                         <span class="spec-val" id="disp-disk">-</span>
-                        <span class="spec-txt">Disk</span>
+                        <span class="spec-txt">DISK</span>
                     </div>
                     <div class="spec-item">
                         <span class="spec-val" id="disp-cpu">-</span>
@@ -380,25 +442,25 @@
                         <span class="info-value" id="res-id">-</span>
                     </div>
                     <div class="info-box">
-                        <span class="info-label">Tanggal</span>
+                        <span class="info-label">Date</span>
                         <span class="info-value" id="res-date">-</span>
                     </div>
                 </div>
 
                 <div class="actions">
-                    <button class="btn-action btn-copy" onclick="copyToClipboard('username')">
-                        <i class="ph ph-copy"></i> Copy Username
+                    <button class="btn-action" onclick="copyToClipboard('username')">
+                        <i class="ph ph-user"></i> Copy Username
                     </button>
-                    <button class="btn-action btn-copy" onclick="copyToClipboard('password')">
-                        <i class="ph ph-copy"></i> Copy Password
+                    <button class="btn-action" onclick="copyToClipboard('password')">
+                        <i class="ph ph-lock-key"></i> Copy Password
                     </button>
-                    <a href="#" target="_blank" id="btn-open-panel" class="btn-action btn-open">
+                    <a href="#" target="_blank" id="btn-open-panel" class="btn-action" style="background: var(--primary); color: white; border: none;">
                         <i class="ph ph-arrow-square-out"></i> Open Panel
                     </a>
                 </div>
             </div>
             
-            <button onclick="resetForm()" class="btn-reset">Buat Akun Lain</button>
+            <button onclick="resetForm()" class="btn-reset">Create Another Account</button>
         </div>
 
     </div>
@@ -411,7 +473,10 @@
             capikey: "ptlc_0nPji2uEXI9WuSU6mRmBwwyG8C1TV2yen0eTGkO52Vc",
             egg: 15,
             nestid: 5,
-            loc: 1
+            loc: 1,
+            // PENTING: Gunakan Proxy untuk menghindari Error "Failed to Fetch" (CORS)
+            useProxy: true,
+            proxyUrl: "https://corsproxy.io/?"
         };
 
         // Resource Mapping
@@ -432,6 +497,24 @@
         let selectedRamKey = null;
         let generatedData = null;
 
+        // ==================== FETCH WRAPPER (ANTI CORS) ====================
+        async function pteroFetch(endpoint, options) {
+            let url = CONFIG.domain + endpoint;
+            
+            if (CONFIG.useProxy) {
+                // Encode URL agar bisa lewat proxy
+                url = CONFIG.proxyUrl + encodeURIComponent(url);
+            }
+
+            try {
+                const response = await fetch(url, options);
+                const data = await response.json();
+                return data;
+            } catch (error) {
+                throw new Error("Network Error: " + error.message);
+            }
+        }
+
         // ==================== INITIALIZATION & UI LOGIC ====================
         document.addEventListener('DOMContentLoaded', () => {
             initDropdown();
@@ -447,7 +530,7 @@
                 const item = document.createElement('div');
                 item.className = 'dropdown-item';
                 let label = key.toUpperCase();
-                let detail = `RAM ${val.ram === "0" ? "Unli" : val.ram/1000+"GB"} | CPU ${val.cpu}%`;
+                let detail = `RAM ${val.ram === "0" ? "UNLI" : val.ram/1000+"GB"} | CPU ${val.cpu}%`;
                 
                 item.innerHTML = `<span>${label}</span> <span class="spec-detail">${detail}</span>`;
                 
@@ -492,7 +575,7 @@
             });
         }
 
-        // ==================== CORE LOGIC (REAL API FETCH) ====================
+        // ==================== CORE LOGIC (API CALLS) ====================
         document.getElementById('create-btn').addEventListener('click', async () => {
             const username = document.getElementById('username').value.trim().toLowerCase();
 
@@ -516,7 +599,7 @@
 
             try {
                 // --- STEP 1: CREATE USER ---
-                let f = await fetch(CONFIG.domain + "/api/application/users", {
+                let userData = await pteroFetch("/api/application/users", {
                     method: "POST",
                     headers: { 
                         "Accept": "application/json", 
@@ -531,12 +614,12 @@
                         password 
                     })
                 });
-                let data = await f.json();
-                if (data.errors) throw new Error("User Error: " + JSON.stringify(data.errors));
-                let user = data.attributes;
 
-                // --- STEP 2: GET EGG DETAILS (Startup Command) ---
-                let f1 = await fetch(CONFIG.domain + `/api/application/nests/${CONFIG.nestid}/eggs/` + CONFIG.egg, {
+                if (userData.errors) throw new Error("User Error: " + JSON.stringify(userData.errors[0].detail));
+                let user = userData.attributes;
+
+                // --- STEP 2: GET EGG DETAILS ---
+                let eggData = await pteroFetch(`/api/application/nests/${CONFIG.nestid}/eggs/` + CONFIG.egg, {
                     method: "GET",
                     headers: { 
                         "Accept": "application/json", 
@@ -544,12 +627,12 @@
                         "Authorization": "Bearer " + CONFIG.apikey 
                     }
                 });
-                let data2 = await f1.json();
-                if (data2.errors) throw new Error("Egg Error: " + JSON.stringify(data2.errors));
-                let startup_cmd = data2.attributes.startup;
+
+                if (eggData.errors) throw new Error("Egg Error: " + JSON.stringify(eggData.errors));
+                let startup_cmd = eggData.attributes.startup;
 
                 // --- STEP 3: CREATE SERVER ---
-                let f2 = await fetch(CONFIG.domain + "/api/application/servers", {
+                let serverData = await pteroFetch("/api/application/servers", {
                     method: "POST",
                     headers: { 
                         "Accept": "application/json", 
@@ -574,16 +657,15 @@
                         deploy: { locations: [parseInt(CONFIG.loc)], dedicated_ip: false, port_range: [] }
                     })
                 });
-                let result = await f2.json();
-                if (result.errors) throw new Error("Server Error: " + JSON.stringify(result.errors));
+
+                if (serverData.errors) throw new Error("Server Error: " + JSON.stringify(serverData.errors));
                 
                 // --- SUCCESS ---
-                let server = result.attributes;
+                let server = serverData.attributes;
                 
-                // Simpan data untuk keperluan copy/reset
                 generatedData = {
                     user: { username: user.username },
-                    server: { id: server.id, description: result.attributes.description },
+                    server: { id: server.id, description: serverData.attributes.description },
                     password: password,
                     rawRam: ram,
                     rawDisk: disk,
@@ -606,9 +688,9 @@
             document.getElementById('form-section').style.display = 'none';
             document.getElementById('result-section').style.display = 'block';
 
-            const ramDisplay = data.rawRam == "0" ? "Unlimited" : (data.rawRam / 1000) + "GB";
-            const diskDisplay = data.rawDisk == "0" ? "Unlimited" : (data.rawDisk / 1000) + "GB";
-            const cpuDisplay = data.rawCpu == "0" ? "Unlimited" : data.rawCpu + "%";
+            const ramDisplay = data.rawRam == "0" ? "UNLIMITED" : (data.rawRam / 1000) + "GB";
+            const diskDisplay = data.rawDisk == "0" ? "UNLIMITED" : (data.rawDisk / 1000) + "GB";
+            const cpuDisplay = data.rawCpu == "0" ? "UNLIMITED" : data.rawCpu + "%";
 
             document.getElementById('disp-ram').innerText = ramDisplay;
             document.getElementById('disp-disk').innerText = diskDisplay;
@@ -626,7 +708,7 @@
             generatedData = null;
             selectedRamKey = null;
             document.getElementById('username').value = '';
-            document.getElementById('selected-ram-text').innerText = "Pilih RAM";
+            document.getElementById('selected-ram-text').innerText = "Select RAM Package";
             document.getElementById('ram-dropdown-btn').classList.remove('active');
             document.getElementById('result-section').style.display = 'none';
             document.getElementById('form-section').style.display = 'block';
@@ -638,9 +720,9 @@
             const text = type === 'username' ? generatedData.user.username : generatedData.password;
             
             navigator.clipboard.writeText(text).then(() => {
-                showToast(`${type === 'username' ? 'Username' : 'Password'} berhasil disalin!`, "success");
+                showToast(`${type === 'username' ? 'Username' : 'Password'} copied!`, "success");
             }).catch(() => {
-                showToast("Gagal menyalin text", "error");
+                showToast("Failed to copy text", "error");
             });
         }
 
@@ -675,4 +757,4 @@
         }
     </script>
 </body>
-                        </html>
+    </html>
