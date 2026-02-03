@@ -14,7 +14,7 @@ body{
   display:flex;align-items:center;justify-content:center;color:#fff
 }
 .card{
-  width:430px;
+  width:440px;
   background:rgba(255,255,255,.08);
   backdrop-filter:blur(15px);
   padding:30px;
@@ -39,7 +39,7 @@ button:hover{opacity:.85}
   background:rgba(0,0,0,.4);
   padding:10px;
   border-radius:10px;
-  max-height:200px;
+  max-height:220px;
   overflow:auto
 }
 .success{color:#0f0;white-space:pre-line}
@@ -49,7 +49,7 @@ button:hover{opacity:.85}
 
 <body>
 
-<div class="card" id="app">
+<div class="card">
 <h1>NYXO PANEL</h1>
 
 <input id="username" placeholder="Username Panel">
@@ -67,33 +67,12 @@ button:hover{opacity:.85}
 </div>
 
 <script>
-// ================= CONFIG =================
-const CONFIG = {
-  domain: "https://nyxostudio.web.id",
-  apikey: "ptla_mIoA2uJSLrSVm0r3l21x2wTjQee9ZpCR5YjifRufQue",
-  capikey: "ptlc_0nPji2uEXI9WuSU6mRmBwwyG8C1TV2yen0eTGkO52Vc",
-  egg: 15,
-  nestid: 5,
-  loc: 1
-};
-
-const resourceMap = {
-  "1gb":{ram:1000,disk:1000,cpu:40},
-  "2gb":{ram:2000,disk:1000,cpu:60},
-  "3gb":{ram:3000,disk:2000,cpu:80},
-  "4gb":{ram:4000,disk:2000,cpu:100},
-  "5gb":{ram:5000,disk:3000,cpu:120},
-  "unlimited":{ram:0,disk:0,cpu:0}
-};
-
-// ================= UTIL =================
 function log(msg,type=""){
   const el=document.getElementById("log");
   el.innerHTML+=`<div class="${type}">• ${msg}</div>`;
   el.scrollTop=el.scrollHeight;
 }
 
-// ================= MAIN =================
 async function buatPanel(){
   document.getElementById("log").innerHTML="";
   const username=document.getElementById("username").value.toLowerCase();
@@ -101,71 +80,29 @@ async function buatPanel(){
 
   if(!username) return alert("Username wajib diisi");
 
-  const spec=resourceMap[paket];
-  const password=username+"001";
-  const email=username+"@gmail.com";
+  log("Menghubungi server...");
+  log("Username: "+username);
+  log("Paket: "+paket);
 
   try{
-    log("Membuat user panel...");
-    const userRes=await fetch(CONFIG.domain+"/api/application/users",{
+    const res = await fetch("/create-panel",{
       method:"POST",
-      headers:{
-        "Authorization":"Bearer "+CONFIG.apikey,
-        "Content-Type":"application/json"
-      },
-      body:JSON.stringify({
-        email,username,
-        first_name:username,
-        last_name:"Server",
-        language:"en",
-        password
-      })
-    });
-    const userData=await userRes.json();
-    if(userData.errors) throw userData.errors[0].detail;
-    const user=userData.attributes;
-    log("User berhasil dibuat");
-
-    log("Mengambil startup egg...");
-    const eggRes=await fetch(
-      `${CONFIG.domain}/api/application/nests/${CONFIG.nestid}/eggs/${CONFIG.egg}`,
-      {headers:{Authorization:"Bearer "+CONFIG.apikey}}
-    );
-    const eggData=await eggRes.json();
-    const startup=eggData.attributes.startup;
-
-    log("Membuat server...");
-    const serverRes=await fetch(CONFIG.domain+"/api/application/servers",{
-      method:"POST",
-      headers:{
-        "Authorization":"Bearer "+CONFIG.apikey,
-        "Content-Type":"application/json"
-      },
-      body:JSON.stringify({
-        name: username+" Server",
-        user: user.id,
-        egg: CONFIG.egg,
-        docker_image:"ghcr.io/parkervcp/yolks:nodejs_20",
-        startup,
-        limits:{memory:spec.ram,disk:spec.disk,cpu:spec.cpu,swap:0,io:500},
-        feature_limits:{databases:5,backups:5,allocations:5},
-        deploy:{locations:[CONFIG.loc],dedicated_ip:false,port_range:[]}
-      })
+      headers:{ "Content-Type":"application/json" },
+      body:JSON.stringify({ username, paket })
     });
 
-    const serverData=await serverRes.json();
-    if(serverData.errors) throw serverData.errors[0].detail;
-    const server=serverData.attributes;
+    const data = await res.json();
+    if(!data.success) throw data.error;
 
-    log("SELESAI ✅","success");
+    log("PANEL BERHASIL DIBUAT","success");
     log(`
-Username : ${username}
-Password : ${password}
-RAM      : ${spec.ram==0?"Unlimited":spec.ram/1000+"GB"}
-Disk     : ${spec.disk==0?"Unlimited":spec.disk/1000+"GB"}
-CPU      : ${spec.cpu==0?"Unlimited":spec.cpu+"%"}
-ServerID : ${server.id}
-Panel    : ${CONFIG.domain}
+Username : ${data.username}
+Password : ${data.password}
+RAM      : ${data.ram}
+Disk     : ${data.disk}
+CPU      : ${data.cpu}
+ServerID : ${data.server_id}
+Panel    : ${data.panel}
 `,"success");
 
   }catch(err){
