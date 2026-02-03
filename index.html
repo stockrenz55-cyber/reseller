@@ -1,115 +1,711 @@
 <!DOCTYPE html>
 <html lang="id">
 <head>
-<meta charset="UTF-8">
-<title>Nyxo Panel Creator</title>
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;600&display=swap" rel="stylesheet">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Panel Creator Pro</title>
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <!-- Phosphor Icons (Icon Ringan) -->
+    <script src="https://unpkg.com/@phosphor-icons/web"></script>
 
-<style>
-*{box-sizing:border-box;font-family:'Orbitron',sans-serif}
-body{
-  min-height:100vh;
-  background:linear-gradient(120deg,#020024,#090979,#00d4ff);
-  display:flex;align-items:center;justify-content:center;color:#fff
-}
-.card{
-  width:440px;
-  background:rgba(255,255,255,.08);
-  backdrop-filter:blur(15px);
-  padding:30px;
-  border-radius:20px;
-  box-shadow:0 0 30px rgba(0,255,255,.4)
-}
-h1{text-align:center;color:#0ff;text-shadow:0 0 20px #0ff}
-input,select{
-  width:100%;margin:10px 0;padding:12px;
-  background:transparent;border:1px solid #0ff;
-  border-radius:10px;color:#fff
-}
-button{
-  width:100%;padding:14px;margin-top:15px;
-  background:#0ff;border:none;border-radius:12px;
-  font-size:16px;cursor:pointer;color:#000
-}
-button:hover{opacity:.85}
-.log{
-  margin-top:15px;
-  font-size:13px;
-  background:rgba(0,0,0,.4);
-  padding:10px;
-  border-radius:10px;
-  max-height:220px;
-  overflow:auto
-}
-.success{color:#0f0;white-space:pre-line}
-.error{color:#f55}
-</style>
+    <style>
+        /* ==================== CSS VARIABLES & RESET ==================== */
+        :root {
+            --bg-overlay: rgba(15, 23, 42, 0.6);
+            --glass-bg: rgba(30, 41, 59, 0.7);
+            --glass-border: rgba(255, 255, 255, 0.08);
+            --primary: #8b5cf6; /* Violet */
+            --primary-hover: #7c3aed;
+            --text-main: #f8fafc;
+            --text-muted: #94a3b8;
+            --success: #10b981;
+            --danger: #ef4444;
+            --shadow-lg: 0 10px 25px -5px rgba(0, 0, 0, 0.5);
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Poppins', sans-serif; }
+        
+        body {
+            min-height: 100vh;
+            /* Background Full Cover */
+            background: url('https://picsum.photos/seed/server/1920/1080') no-repeat center center fixed;
+            background-size: cover;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            color: var(--text-main);
+            overflow-x: hidden;
+            padding: 20px;
+        }
+
+        /* Overlay Gelap */
+        body::before {
+            content: '';
+            position: fixed; top: 0; left: 0; right: 0; bottom: 0;
+            background: var(--bg-overlay);
+            backdrop-filter: blur(8px);
+            z-index: -1;
+        }
+
+        /* ==================== MAIN CONTAINER ==================== */
+        .glass-card {
+            width: 100%;
+            max-width: 450px;
+            background: var(--glass-bg);
+            border: 1px solid var(--glass-border);
+            border-radius: 20px;
+            padding: 2rem;
+            box-shadow: var(--shadow-lg);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            animation: slideUp 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 2rem;
+        }
+
+        .header h1 { font-size: 1.8rem; font-weight: 700; margin-bottom: 0.5rem; letter-spacing: -0.5px; }
+        .header p { color: var(--text-muted); font-size: 0.9rem; }
+
+        /* ==================== FORM ELEMENTS ==================== */
+        .form-group { margin-bottom: 1.5rem; position: relative; }
+        
+        label { display: block; margin-bottom: 0.5rem; font-size: 0.85rem; font-weight: 500; color: var(--text-muted); }
+
+        input {
+            width: 100%;
+            padding: 12px 15px;
+            background: rgba(0, 0, 0, 0.2);
+            border: 1px solid var(--glass-border);
+            border-radius: 10px;
+            color: #fff;
+            font-size: 0.95rem;
+            transition: all 0.3s ease;
+            outline: none;
+        }
+
+        input:focus {
+            border-color: var(--primary);
+            box-shadow: 0 0 0 2px rgba(139, 92, 246, 0.2);
+            background: rgba(0, 0, 0, 0.4);
+        }
+
+        /* Custom Dropdown Scrollable */
+        .dropdown-container { position: relative; }
+        
+        .dropdown-btn {
+            width: 100%;
+            padding: 12px 15px;
+            background: rgba(0, 0, 0, 0.2);
+            border: 1px solid var(--glass-border);
+            border-radius: 10px;
+            color: #fff;
+            cursor: pointer;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            user-select: none;
+            transition: 0.3s;
+        }
+        .dropdown-btn:hover, .dropdown-btn.active { border-color: var(--primary); }
+
+        .dropdown-menu {
+            position: absolute;
+            top: 110%; left: 0; right: 0;
+            background: #1e293b;
+            border: 1px solid var(--glass-border);
+            border-radius: 10px;
+            max-height: 0;
+            overflow-y: auto;
+            transition: max-height 0.3s ease-in-out, opacity 0.3s;
+            opacity: 0;
+            z-index: 10;
+            box-shadow: var(--shadow-lg);
+        }
+        
+        .dropdown-menu.show { max-height: 200px; opacity: 1; overflow-y: scroll; }
+        
+        .dropdown-item {
+            padding: 10px 15px;
+            cursor: pointer;
+            transition: 0.2s;
+            display: flex;
+            justify-content: space-between;
+            border-bottom: 1px solid rgba(255,255,255,0.05);
+        }
+        .dropdown-item:hover { background: var(--primary); color: #fff; }
+        .dropdown-item:last-child { border-bottom: none; }
+        .dropdown-item span.spec-detail { font-size: 0.75rem; opacity: 0.7; }
+
+        /* Tombol Utama */
+        .btn-submit {
+            width: 100%;
+            padding: 14px;
+            margin-top: 1rem;
+            background: linear-gradient(135deg, var(--primary), #6366f1);
+            border: none;
+            border-radius: 10px;
+            color: white;
+            font-weight: 600;
+            cursor: pointer;
+            position: relative;
+            overflow: hidden;
+            transition: transform 0.2s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+        .btn-submit:hover { transform: translateY(-2px); box-shadow: 0 4px 15px rgba(139, 92, 246, 0.4); }
+        .btn-submit:active { transform: translateY(0); }
+
+        /* Ripple Effect */
+        .ripple {
+            position: absolute;
+            border-radius: 50%;
+            transform: scale(0);
+            animation: ripple 0.6s linear;
+            background-color: rgba(255, 255, 255, 0.3);
+            pointer-events: none;
+        }
+        @keyframes ripple { to { transform: scale(4); opacity: 0; } }
+
+        /* ==================== RESULT CARD ==================== */
+        .result-container {
+            display: none; /* Hidden by default */
+            animation: fadeIn 0.5s ease;
+            margin-top: 1rem;
+        }
+
+        .result-card {
+            background: rgba(16, 185, 129, 0.1); /* Green tint background */
+            border: 1px solid rgba(16, 185, 129, 0.3);
+            border-radius: 15px;
+            padding: 1.5rem;
+            text-align: center;
+        }
+
+        .success-icon { color: var(--success); font-size: 3rem; margin-bottom: 0.5rem; animation: popIn 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
+
+        .info-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+            margin: 1.5rem 0;
+            text-align: left;
+        }
+
+        .info-box {
+            background: rgba(0,0,0,0.3);
+            padding: 10px;
+            border-radius: 8px;
+        }
+        .info-label { font-size: 0.7rem; color: var(--text-muted); display: block; margin-bottom: 2px; }
+        .info-value { font-size: 0.9rem; font-weight: 600; color: #fff; word-break: break-all; }
+        
+        .specs-display {
+            display: flex;
+            justify-content: space-around;
+            margin-bottom: 1.5rem;
+            background: rgba(255,255,255,0.05);
+            padding: 10px;
+            border-radius: 8px;
+        }
+        .spec-item { text-align: center; }
+        .spec-val { font-weight: bold; color: var(--primary); display: block; }
+        .spec-txt { font-size: 0.7rem; color: var(--text-muted); }
+
+        .actions {
+            display: flex;
+            gap: 10px;
+            flex-direction: column;
+        }
+
+        .btn-action {
+            padding: 10px;
+            border-radius: 8px;
+            border: none;
+            cursor: pointer;
+            font-size: 0.9rem;
+            font-weight: 500;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            transition: 0.2s;
+            text-decoration: none;
+            color: white;
+        }
+        
+        .btn-copy { background: rgba(255,255,255,0.1); }
+        .btn-copy:hover { background: rgba(255,255,255,0.2); }
+        
+        .btn-open { background: var(--primary); }
+        .btn-open:hover { background: var(--primary-hover); }
+
+        .btn-reset {
+            background: none; border: none; color: var(--text-muted); margin-top: 15px;
+            text-decoration: underline; cursor: pointer; font-size: 0.85rem;
+        }
+
+        /* ==================== LOADING & TOAST ==================== */
+        .loading-overlay {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.8);
+            backdrop-filter: blur(5px);
+            z-index: 100;
+            display: none;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .spinner {
+            width: 50px; height: 50px;
+            border: 4px solid rgba(255,255,255,0.1);
+            border-left-color: var(--primary);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin-bottom: 15px;
+        }
+
+        .toast-container {
+            position: fixed; top: 20px; right: 20px; z-index: 999;
+            display: flex; flex-direction: column; gap: 10px;
+        }
+        .toast {
+            background: #1e293b; color: #fff;
+            padding: 12px 20px; border-radius: 8px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+            border-left: 4px solid var(--primary);
+            font-size: 0.9rem;
+            transform: translateX(120%);
+            transition: transform 0.4s ease;
+            display: flex; align-items: center; gap: 10px;
+        }
+        .toast.show { transform: translateX(0); }
+        .toast.error { border-color: var(--danger); }
+        .toast.success { border-color: var(--success); }
+
+        /* ==================== ANIMATIONS ==================== */
+        @keyframes spin { 100% { transform: rotate(360deg); } }
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+        @keyframes slideUp { from { opacity: 0; transform: translateY(30px); } to { opacity: 1; transform: translateY(0); } }
+        @keyframes popIn { 0% { transform: scale(0); } 80% { transform: scale(1.1); } 100% { transform: scale(1); } }
+
+    </style>
 </head>
-
 <body>
 
-<div class="card">
-<h1>NYXO PANEL</h1>
+    <!-- Loading Overlay -->
+    <div id="loading-overlay" class="loading-overlay">
+        <div class="spinner"></div>
+        <div style="font-weight: 500;">Sedang Membuat Panel...</div>
+    </div>
 
-<input id="username" placeholder="Username Panel">
-<select id="paket">
-  <option value="1gb">1 GB</option>
-  <option value="2gb">2 GB</option>
-  <option value="3gb">3 GB</option>
-  <option value="4gb">4 GB</option>
-  <option value="5gb">5 GB</option>
-  <option value="unlimited">Unlimited</option>
-</select>
+    <!-- Toast Notifications -->
+    <div id="toast-container" class="toast-container"></div>
 
-<button onclick="buatPanel()">CREATE PANEL</button>
-<div class="log" id="log"></div>
-</div>
+    <!-- Main Glass Container -->
+    <div class="glass-card">
+        
+        <!-- FORM INPUT SECTION -->
+        <div id="form-section">
+            <div class="header">
+                <h1>Create Panel</h1>
+                <p>Generate Pterodactyl Server Otomatis</p>
+            </div>
 
-<script>
-function log(msg,type=""){
-  const el=document.getElementById("log");
-  el.innerHTML+=`<div class="${type}">• ${msg}</div>`;
-  el.scrollTop=el.scrollHeight;
-}
+            <div class="form-group">
+                <label>Username <span style="color:var(--danger)">*</span></label>
+                <input type="text" id="username" placeholder="Masukkan username..." autocomplete="off">
+            </div>
 
-async function buatPanel(){
-  document.getElementById("log").innerHTML="";
-  const username=document.getElementById("username").value.toLowerCase();
-  const paket=document.getElementById("paket").value;
+            <div class="form-group">
+                <label>Nomor WhatsApp (Opsional)</label>
+                <input type="number" id="whatsapp" placeholder="08xx...">
+            </div>
 
-  if(!username) return alert("Username wajib diisi");
+            <div class="form-group">
+                <label>Pilih Spesifikasi</label>
+                <div class="dropdown-container">
+                    <div class="dropdown-btn" id="ram-dropdown-btn">
+                        <span id="selected-ram-text">Pilih RAM</span>
+                        <i class="ph ph-caret-down"></i>
+                    </div>
+                    <div class="dropdown-menu" id="ram-menu">
+                        <!-- Options generated by JS -->
+                    </div>
+                </div>
+            </div>
 
-  log("Menghubungi server...");
-  log("Username: "+username);
-  log("Paket: "+paket);
+            <button class="btn-submit" id="create-btn">
+                <i class="ph ph-plus-circle"></i> Buat Panel Sekarang
+            </button>
+        </div>
 
-  try{
-    const res = await fetch("/create-panel",{
-      method:"POST",
-      headers:{ "Content-Type":"application/json" },
-      body:JSON.stringify({ username, paket })
-    });
+        <!-- RESULT SECTION -->
+        <div id="result-section" class="result-container">
+            <div class="result-card">
+                <i class="ph ph-check-circle success-icon"></i>
+                <h2 style="margin-bottom: 5px;">Berhasil!</h2>
+                <p style="font-size: 0.85rem; color: var(--text-muted);">Panel telah aktif dan siap digunakan.</p>
 
-    const data = await res.json();
-    if(!data.success) throw data.error;
+                <div class="specs-display">
+                    <div class="spec-item">
+                        <span class="spec-val" id="disp-ram">-</span>
+                        <span class="spec-txt">RAM</span>
+                    </div>
+                    <div class="spec-item">
+                        <span class="spec-val" id="disp-disk">-</span>
+                        <span class="spec-txt">Disk</span>
+                    </div>
+                    <div class="spec-item">
+                        <span class="spec-val" id="disp-cpu">-</span>
+                        <span class="spec-txt">CPU</span>
+                    </div>
+                </div>
 
-    log("PANEL BERHASIL DIBUAT","success");
-    log(`
-Username : ${data.username}
-Password : ${data.password}
-RAM      : ${data.ram}
-Disk     : ${data.disk}
-CPU      : ${data.cpu}
-ServerID : ${data.server_id}
-Panel    : ${data.panel}
-`,"success");
+                <div class="info-grid">
+                    <div class="info-box">
+                        <span class="info-label">Username</span>
+                        <span class="info-value" id="res-username">-</span>
+                    </div>
+                    <div class="info-box">
+                        <span class="info-label">Password</span>
+                        <span class="info-value" id="res-password">-</span>
+                    </div>
+                    <div class="info-box">
+                        <span class="info-label">Server ID</span>
+                        <span class="info-value" id="res-id">-</span>
+                    </div>
+                    <div class="info-box">
+                        <span class="info-label">Tanggal</span>
+                        <span class="info-value" id="res-date">-</span>
+                    </div>
+                </div>
 
-  }catch(err){
-    log("ERROR: "+err,"error");
-  }
-}
-</script>
+                <div class="actions">
+                    <button class="btn-action btn-copy" onclick="copyToClipboard('username')">
+                        <i class="ph ph-copy"></i> Copy Username
+                    </button>
+                    <button class="btn-action btn-copy" onclick="copyToClipboard('password')">
+                        <i class="ph ph-copy"></i> Copy Password
+                    </button>
+                    <a href="#" target="_blank" id="btn-open-panel" class="btn-action btn-open">
+                        <i class="ph ph-arrow-square-out"></i> Open Panel
+                    </a>
+                </div>
+            </div>
+            
+            <button onclick="resetForm()" class="btn-reset">Buat Akun Lain</button>
+        </div>
 
+    </div>
+
+    <script>
+        // ==================== CONFIGURATION ====================
+        const CONFIG = {
+            domain: "https://nyxostudio.web.id", // Ganti dengan domain panel asli
+            apikey: "ptla_mIoA2uJSLrSVm0r3l21x2wTjQee9ZpCR5YjifRufQue",               // Ganti dengan Application API Key
+            capikey: "ptlc_0nPji2uEXI9WuSU6mRmBwwyG8C1TV2yen0eTGkO52Vc",       // Ganti dengan Client API Key
+            egg: 15,
+            nestid: 5,
+            loc: 1
+        };
+
+        // Resource Mapping (Sama persis dengan kode WA asli)
+        const RESOURCE_MAP = {
+            "1gb": { ram: "1000", disk: "1000", cpu: "40" },
+            "2gb": { ram: "2000", disk: "1000", cpu: "60" },
+            "3gb": { ram: "3000", disk: "2000", cpu: "80" },
+            "4gb": { ram: "4000", disk: "2000", cpu: "100" },
+            "5gb": { ram: "5000", disk: "3000", cpu: "120" },
+            "6gb": { ram: "6000", disk: "3000", cpu: "140" },
+            "7gb": { ram: "7000", disk: "4000", cpu: "160" },
+            "8gb": { ram: "8000", disk: "4000", cpu: "180" },
+            "9gb": { ram: "9000", disk: "5000", cpu: "200" },
+            "10gb": { ram: "10000", disk: "5000", cpu: "220" },
+            "unlimited": { ram: "0", disk: "0", cpu: "0" }
+        };
+
+        // State Global
+        let selectedRamKey = null;
+        let generatedData = null;
+
+        // ==================== INITIALIZATION & UI LOGIC ====================
+        document.addEventListener('DOMContentLoaded', () => {
+            initDropdown();
+            initRippleEffect();
+        });
+
+        // Render Dropdown Options
+        function initDropdown() {
+            const menu = document.getElementById('ram-menu');
+            const btn = document.getElementById('ram-dropdown-btn');
+            const txt = document.getElementById('selected-ram-text');
+
+            // Populate items
+            for (const [key, val] of Object.entries(RESOURCE_MAP)) {
+                const item = document.createElement('div');
+                item.className = 'dropdown-item';
+                
+                // Format text display
+                let label = key.toUpperCase();
+                let detail = `RAM ${val.ram === "0" ? "Unli" : val.ram/1000+"GB"} | CPU ${val.cpu}%`;
+                
+                item.innerHTML = `<span>${label}</span> <span class="spec-detail">${detail}</span>`;
+                
+                item.addEventListener('click', () => {
+                    selectedRamKey = key;
+                    txt.innerText = label;
+                    btn.classList.add('active'); // Visual feedback
+                    closeDropdown();
+                });
+                menu.appendChild(item);
+            }
+
+            // Toggle dropdown
+            btn.addEventListener('click', (e) => {
+                e.stopPropagation();
+                menu.classList.toggle('show');
+            });
+
+            // Close when clicking outside
+            document.addEventListener('click', (e) => {
+                if (!menu.contains(e.target) && !btn.contains(e.target)) {
+                    closeDropdown();
+                }
+            });
+        }
+
+        function closeDropdown() {
+            document.getElementById('ram-menu').classList.remove('show');
+        }
+
+        function initRippleEffect() {
+            const buttons = document.querySelectorAll('.btn-submit, .btn-action, .dropdown-btn');
+            buttons.forEach(btn => {
+                btn.addEventListener('click', function(e) {
+                    const x = e.clientX - e.target.getBoundingClientRect().left;
+                    const y = e.clientY - e.target.getBoundingClientRect().top;
+                    const ripple = document.createElement('span');
+                    ripple.classList.add('ripple');
+                    ripple.style.left = `${x}px`;
+                    ripple.style.top = `${y}px`;
+                    this.appendChild(ripple);
+                    setTimeout(() => ripple.remove(), 600);
+                });
+            });
+        }
+
+        // ==================== CORE LOGIC (MOCK API) ====================
+        document.getElementById('create-btn').addEventListener('click', async () => {
+            const username = document.getElementById('username').value.trim().toLowerCase();
+            const whatsapp = document.getElementById('whatsapp').value.trim();
+
+            // 1. Validasi
+            if (!username) {
+                showToast("Username wajib diisi!", "error");
+                return;
+            }
+            if (!selectedRamKey) {
+                showToast("Silakan pilih spesifikasi RAM!", "error");
+                return;
+            }
+
+            // 2. Persiapan Data
+            const { ram, disk, cpu } = RESOURCE_MAP[selectedRamKey];
+            const email = `${username}@gmail.com`;
+            const name = capitalize(username) + " Server";
+            const password = username + "001";
+            const dateStr = formatDate(new Date());
+
+            // 3. Mulai Proses (Loading)
+            toggleLoading(true);
+
+            try {
+            // 1. Create User
+            let f = await fetch(CONFIG.domain + "/api/application/users", {
+                method: "POST",
+                headers: { "Accept": "application/json", "Content-Type": "application/json", "Authorization": "Bearer " + CONFIG.apikey },
+                body: JSON.stringify({ email, username, first_name: name, last_name: "Server", language: "en", password })
+            });
+            let data = await f.json();
+            if (data.errors) throw new Error(JSON.stringify(data.errors));
+            let user = data.attributes;
+
+            // 2. Get Egg
+            let f1 = await fetch(CONFIG.domain + `/api/application/nests/${CONFIG.nestid}/eggs/` + CONFIG.egg, {
+                method: "GET",
+                headers: { "Accept": "application/json", "Content-Type": "application/json", "Authorization": "Bearer " + CONFIG.apikey }
+            });
+            let data2 = await f1.json();
+            let startup_cmd = data2.attributes.startup;
+
+            // 3. Create Server
+            let f2 = await fetch(CONFIG.domain + "/api/application/servers", {
+                method: "POST",
+                headers: { "Accept": "application/json", "Content-Type": "application/json", "Authorization": "Bearer " + CONFIG.apikey },
+                body: JSON.stringify({
+                    name, description: formatDate(new Date()), user: user.id,
+                    egg: parseInt(CONFIG.egg), docker_image: "ghcr.io/parkervcp/yolks:nodejs_20",
+                    startup: startup_cmd,
+                    environment: { INST: "npm", USER_UPLOAD: "0", AUTO_UPDATE: "0", CMD_RUN: "npm start" },
+                    limits: { memory: ram, swap: 0, disk, io: 500, cpu },
+                    feature_limits: { databases: 5, backups: 5, allocations: 5 },
+                    deploy: { locations: [parseInt(CONFIG.loc)], dedicated_ip: false, port_range: [] }
+                })
+            });
+            let result = await f2.json();
+            if (result.errors) throw new Error(JSON.stringify(result.errors));
+            
+            // Process result...
+        } catch (err) {
+            throw err;
+        }
+
+        // ==================== RENDER HASIL ====================
+        function renderResult(data) {
+            // Sembunyikan form, tampilkan result
+            document.getElementById('form-section').style.display = 'none';
+            document.getElementById('result-section').style.display = 'block';
+
+            // Format Data untuk tampilan
+            const ramDisplay = data.rawRam == "0" ? "Unlimited" : (data.rawRam / 1000) + "GB";
+            const diskDisplay = data.rawDisk == "0" ? "Unlimited" : (data.rawDisk / 1000) + "GB";
+            const cpuDisplay = data.rawCpu == "0" ? "Unlimited" : data.rawCpu + "%";
+
+            // Isi ke DOM
+            document.getElementById('disp-ram').innerText = ramDisplay;
+            document.getElementById('disp-disk').innerText = diskDisplay;
+            document.getElementById('disp-cpu').innerText = cpuDisplay;
+
+            document.getElementById('res-username').innerText = data.user.username;
+            document.getElementById('res-password').innerText = data.password;
+            document.getElementById('res-id').innerText = "#" + data.server.id;
+            document.getElementById('res-date').innerText = data.server.description;
+
+            // Set Link Panel
+            document.getElementById('btn-open-panel').href = CONFIG.domain;
+        }
+
+        function resetForm() {
+            // Reset state
+            generatedData = null;
+            selectedRamKey = null;
+            document.getElementById('username').value = '';
+            document.getElementById('whatsapp').value = '';
+            document.getElementById('selected-ram-text').innerText = "Pilih RAM";
+            document.getElementById('ram-dropdown-btn').classList.remove('active');
+
+            // Toggle tampilan
+            document.getElementById('result-section').style.display = 'none';
+            document.getElementById('form-section').style.display = 'block';
+        }
+
+        // ==================== UTILITIES ====================
+        function copyToClipboard(type) {
+            if (!generatedData) return;
+            const text = type === 'username' ? generatedData.user.username : generatedData.password;
+            
+            navigator.clipboard.writeText(text).then(() => {
+                showToast(`${type === 'username' ? 'Username' : 'Password'} berhasil disalin!`, "success");
+            }).catch(() => {
+                showToast("Gagal menyalin text", "error");
+            });
+        }
+
+        function toggleLoading(show) {
+            const loader = document.getElementById('loading-overlay');
+            loader.style.display = show ? 'flex' : 'none';
+        }
+
+        function showToast(message, type = "success") {
+            const container = document.getElementById('toast-container');
+            const toast = document.createElement('div');
+            toast.className = `toast ${type}`;
+            
+            const icon = type === 'success' ? 'check-circle' : 'warning-circle';
+            toast.innerHTML = `<i class="ph ph-${icon}" style="font-size:1.2rem"></i> ${message}`;
+            
+            container.appendChild(toast);
+            
+            // Animasi masuk
+            setTimeout(() => toast.classList.add('show'), 10);
+
+            // Hapus setelah 3 detik
+            setTimeout(() => {
+                toast.classList.remove('show');
+                setTimeout(() => toast.remove(), 400);
+            }, 3000);
+        }
+
+        function capitalize(str) {
+            return str.charAt(0).toUpperCase() + str.slice(1);
+        }
+
+        function formatDate(date) {
+            return date.toLocaleDateString('id-ID', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
+        }
+
+        /* 
+        CATATAN INTEGRASI BACKEND:
+        Untuk mengganti Mock API dengan API Pterodactyl Asli:
+        
+        1. Uncomment kode fetch di bawah ini.
+        2. Pastikan CONFIG.domain dan CONFIG.apikey sudah benar.
+        3. Hapus atau return early di fungsi simulatePanelCreation.
+
+        // Contoh Implementasi Fetch Asli (PSEUDOCODE)
+        /*
+        try {
+            // 1. Create User
+            let f = await fetch(CONFIG.domain + "/api/application/users", {
+                method: "POST",
+                headers: { "Accept": "application/json", "Content-Type": "application/json", "Authorization": "Bearer " + CONFIG.apikey },
+                body: JSON.stringify({ email, username, first_name: name, last_name: "Server", language: "en", password })
+            });
+            let data = await f.json();
+            if (data.errors) throw new Error(JSON.stringify(data.errors));
+            let user = data.attributes;
+
+            // 2. Get Egg
+            let f1 = await fetch(CONFIG.domain + `/api/application/nests/${CONFIG.nestid}/eggs/` + CONFIG.egg, {
+                method: "GET",
+                headers: { "Accept": "application/json", "Content-Type": "application/json", "Authorization": "Bearer " + CONFIG.apikey }
+            });
+            let data2 = await f1.json();
+            let startup_cmd = data2.attributes.startup;
+
+            // 3. Create Server
+            let f2 = await fetch(CONFIG.domain + "/api/application/servers", {
+                method: "POST",
+                headers: { "Accept": "application/json", "Content-Type": "application/json", "Authorization": "Bearer " + CONFIG.apikey },
+                body: JSON.stringify({
+                    name, description: formatDate(new Date()), user: user.id,
+                    egg: parseInt(CONFIG.egg), docker_image: "ghcr.io/parkervcp/yolks:nodejs_20",
+                    startup: startup_cmd,
+                    environment: { INST: "npm", USER_UPLOAD: "0", AUTO_UPDATE: "0", CMD_RUN: "npm start" },
+                    limits: { memory: ram, swap: 0, disk, io: 500, cpu },
+                    feature_limits: { databases: 5, backups: 5, allocations: 5 },
+                    deploy: { locations: [parseInt(CONFIG.loc)], dedicated_ip: false, port_range: [] }
+                })
+            });
+            let result = await f2.json();
+            if (result.errors) throw new Error(JSON.stringify(result.errors));
+            
+            // Process result...
+        } catch (err) {
+            throw err;
+        }
+        */
+
+    </script>
 </body>
-</html>
+  </html>
