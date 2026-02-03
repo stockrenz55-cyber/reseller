@@ -5,7 +5,6 @@
 <title>Nyxo Panel Creator</title>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-<!-- FONT -->
 <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;600&display=swap" rel="stylesheet">
 
 <style>
@@ -29,16 +28,13 @@ body{
   color:#fff;
 }
 
-/* CARD */
 .card{
   width:420px;
   padding:30px;
   backdrop-filter: blur(12px);
   background: rgba(255,255,255,.08);
   border-radius:18px;
-  box-shadow:
-    0 0 25px rgba(0,255,255,.3),
-    inset 0 0 15px rgba(255,255,255,.1);
+  box-shadow:0 0 25px rgba(0,255,255,.3);
   animation: float 4s ease-in-out infinite;
 }
 
@@ -54,7 +50,6 @@ h1{
   text-shadow:0 0 15px #0ff;
 }
 
-/* INPUT */
 input, select{
   width:100%;
   padding:12px;
@@ -63,12 +58,8 @@ input, select{
   border:1px solid rgba(0,255,255,.4);
   border-radius:10px;
   color:#fff;
-  outline:none;
 }
 
-input::placeholder{color:#aaa}
-
-/* BUTTON */
 button{
   width:100%;
   padding:14px;
@@ -86,29 +77,35 @@ button{
 button:hover{
   background:#0ff;
   color:#000;
-  box-shadow:
-    0 0 25px #0ff,
-    0 0 50px #0ff;
+  box-shadow:0 0 40px #0ff;
   transform:scale(1.05);
 }
 
-/* RESULT */
-#result{
+.status{
+  text-align:center;
+  animation: fade .6s ease;
+}
+
+@keyframes fade{
+  from{opacity:0;transform:scale(.9)}
+  to{opacity:1;transform:scale(1)}
+}
+
+.success{
   margin-top:15px;
-  font-size:14px;
   color:#0f0;
   white-space:pre-line;
+  text-shadow:0 0 10px #0f0;
 }
 </style>
 </head>
 
 <body>
 
-<div class="card">
+<div class="card" id="app">
   <h1>NYXO PANEL</h1>
 
-  <input id="username" placeholder="Username">
-  <input id="nomor" placeholder="Nomor WhatsApp 628xxx">
+  <input id="username" placeholder="Username Panel">
 
   <select id="paket">
     <option value="1gb">1 GB</option>
@@ -120,8 +117,6 @@ button:hover{
   </select>
 
   <button onclick="buatPanel()">CREATE PANEL</button>
-
-  <div id="result"></div>
 </div>
 
 <script src="config.js"></script>
@@ -136,33 +131,41 @@ const resourceMap = {
   "unlimited": { ram:0, disk:0, cpu:0 }
 };
 
-async function buatPanel(){
+function buatPanel(){
   const user = document.getElementById("username").value.toLowerCase();
-  const nomor = document.getElementById("nomor").value;
   const paket = document.getElementById("paket").value;
   const res = resourceMap[paket];
 
-  if(!user || !nomor){
-    alert("Lengkapi data!");
+  if(!user){
+    alert("Username wajib diisi!");
     return;
   }
 
-  document.getElementById("result").innerText = "⏳ Membuat panel...";
+  // MODE CREATING
+  document.getElementById("app").innerHTML = `
+    <div class="status">
+      <h1>⏳ CREATING PANEL</h1>
+      <p>Mohon tunggu...</p>
+    </div>
+  `;
 
-  try{
-    // INI CONTOH REQUEST (HARUS VIA BACKEND NODE.JS)
-    document.getElementById("result").innerText =
-`✅ PANEL BERHASIL (SIMULASI)
-
+  setTimeout(() => {
+    // MODE SUCCESS / DATA TERKIRIM
+    document.getElementById("app").innerHTML = `
+      <div class="status">
+        <h1>✅ PANEL BERHASIL</h1>
+        <div class="success">
 Username : ${user}
 Password : ${user}001
-RAM      : ${res.ram == 0 ? "Unlimited" : res.ram/1000+"GB"}
-Disk     : ${res.disk == 0 ? "Unlimited" : res.disk/1000+"GB"}
-CPU      : ${res.cpu == 0 ? "Unlimited" : res.cpu+"%"}
-Panel    : ${CONFIG.domain}`;
-  }catch(e){
-    document.getElementById("result").innerText = "❌ Error: "+e;
-  }
+RAM      : ${res.ram==0?"Unlimited":res.ram/1000+"GB"}
+Disk     : ${res.disk==0?"Unlimited":res.disk/1000+"GB"}
+CPU      : ${res.cpu==0?"Unlimited":res.cpu+"%"}
+Panel    : ${CONFIG.domain}
+        </div>
+        <button onclick="location.reload()">BUAT PANEL LAGI</button>
+      </div>
+    `;
+  }, 2000);
 }
 </script>
 
