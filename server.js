@@ -1,82 +1,127 @@
 const express = require("express");
-const jwt = require("jsonwebtoken");
 const fetch = require("node-fetch");
-const cors = require("cors");
-const config = require("./config");
+const bodyParser = require("body-parser");
+const CONFIG = require("./config");
 
 const app = express();
-app.use(cors());
-app.use(express.json());
+app.use(bodyParser.json());
+app.use(express.static("."));
 
-let USERS = {};   // username -> { pass, role, device }
-let LOGS = [];
+const resourceMap = {
+  "1gb": { ram:1000, disk:1000, cpu:40 },
+  "2gb": { ram:2000, disk:1000, cpu:60 },
+  "3gb": { ram:3000, disk:2000, cpu:80 },
+  "4gb": { ram:4000, disk:2000, cpu:100 },
+  "5gb": { ram:5000, disk:3000, cpu:120 },
+  "unlimited": { ram:0, disk:0, cpu:0 }
+};
 
-function log(type, msg) {
-  const t = new Date().toISOString();
-  LOGS.unshift(`[${t}] [${type}] ${msg}`);
-  if (LOGS.length > 300) LOGS.pop();
-  console.log(LOGS[0]);
-}
-
-/* ================= LOGIN ================= */
-app.post("/login", (req, res) => {
-  const { username, password, device } = req.body;
-
-  if (username === config.OWNER_USER && password === config.OWNER_PASS) {
-    USERS[username] ??= { role: "owner", device: null };
-  }
-
-  const user = USERS[username];
-  if (!user || user.pass && user.pass !== password) {
-    log("LOGIN_FAIL", username);
-    return res.status(401).json({ error: "Username / Password salah" });
-  }
-
-  if (user.device && user.device !== device) {
-    log("DEVICE_BLOCK", username);
-    return res.status(403).json({ error: "Akun sedang login di device lain" });
-  }
-
-  user.device = device;
-
-  const token = jwt.sign(
-    { username, role: user.role },
-    config.JWT_SECRET,
-    { expiresIn: "1h" }
-  );
-
-  log("LOGIN_OK", username);
-  res.json({ token, role: user.role });
-});
-
-/* ================= AUTH ================= */
-function auth(req, res, next) {
+app.post("/create-panel", async (req, res) => {
   try {
-    const token = req.headers.authorization;
-    const data = jwt.verify(token, config.JWT_SECRET);
-    req.user = data;
-    next();
-  } catch {
-    res.status(401).json({ error: "Token invalid" });
-  }
-}
+    const { username, paket } = req.body;
+    if (!username) return res.status(400).json({ error: "Username kosong" });
 
-/* ================= CREATE PANEL ================= */
-app.post("/create-panel", auth, async (req, res) => {
-  try {
-    log("CREATE_PANEL", req.user.username);
-    res.json({ success: true });
+    const spec = resourceMap[paket];
+    const email = `${username}@gmail.com`;
+    const password = `${username}001`;
+
+    /* ================= CREATE USER ================= */
+    const userRes = await fetch(`${CONFIG.domain}/api/application/users`, {
+      method: "POST",
+      headers: {
+        Authorization: `Bearer ${CONFIG.apikey}`,
+        Accept: "application/json",
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify({
+        email,
+        username,
+        first_name: username,
+        last_name: "Server",
+        password
+      })
+    }).then(r => r.json());
+
+    if (userRes.errors) return res.json(userRes);
+
+    /* ================= GET EGG ================= */
+    const eggRes = await fetch(
+      `${CONFIG.domain}/api/application/nests/${CONFIG.nestid}/eggs/${CONFIG.egg}`,
+      {
+        headers: {
+          Authorization: `Bearer ${CONFIG.apikey}`,
+          Accept: "application/json"
+        }
+      }
+    ).then(r => r.json());
+
+    /* ================= CREATE SERVER ================= */
+    const serverRes = await fetch(`${CONFIG.domain}/api/application/servers`, {
+      method: "POST",
+      headers: {
+        Authorization: `Bearer ${CONFIG.apikey}`,
+        Accept: "application/json",
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify({
+        name: `${username} Server`,
+        user: userRes.attributes.id,
+        egg: CONFIG.egg,
+        docker_image: "ghcr.io/parkervcp/yolks:nodejs_20",
+        startup: eggRes.attributes.startup,
+        environment: {
+          INST: "npm",
+          USER_UPLOAD: "0",
+          AUTO_UPDATE: "0",
+          CMD_RUN: "npm start"
+        },
+        limits: {
+          memory: spec.ram,
+          disk: spec.disk,
+          cpu: spec.cpu,
+          swap: 0,
+          io: 500
+        },
+        feature_limits: {
+          databases: 5,
+          backups: 5,
+          allocations: 5
+        },
+        deploy: {
+          locations: [CONFIG.loc],
+          dedicated_ip: false
+        }
+      })
+    }).then(r => r.json());
+
+    /* ================= AUTO START SERVER (CAPIKEY) ================= */
+    await fetch(
+      `${CONFIG.domain}/api/client/servers/${serverRes.attributes.identifier}/power`,
+      {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${CONFIG.capikey}`,
+          Accept: "application/json",
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify({ signal: "start" })
+      }
+    );
+
+    res.json({
+      success: true,
+      username,
+      password,
+      spec,
+      panel: CONFIG.domain,
+      server_id: serverRes.attributes.id
+    });
+
   } catch (e) {
-    log("ERROR", e.message);
     res.status(500).json({ error: e.message });
   }
 });
 
-/* ================= LOG VIEW ================= */
-app.get("/logs", auth, (req, res) => {
-  res.json(LOGS);
+app.listen(3000, () => {
+  console.log("✅ Panel Creator running → http://localhost:3000");
 });
-
-app.listen(config.PORT, () =>
-  console.log("SERVER RUNNING:", config.PORT)
-);
