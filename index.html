@@ -1,96 +1,168 @@
 <!DOCTYPE html>
-<html>
+<html lang="id">
 <head>
 <meta charset="UTF-8">
-<title>Reseller Panel</title>
+<title>Nyxo Panel Creator</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<!-- FONT -->
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;600&display=swap" rel="stylesheet">
+
 <style>
-body {
+*{
   margin:0;
-  font-family:Arial;
-  background:url("https://images.unsplash.com/photo-1518770660439-4636190af475") no-repeat center/cover;
+  padding:0;
+  box-sizing:border-box;
+  font-family:'Orbitron',sans-serif;
+}
+
+body{
+  min-height:100vh;
+  background:
+    linear-gradient(rgba(0,0,0,.65),rgba(0,0,0,.85)),
+    url("https://images.unsplash.com/photo-1535223289827-42f1e9919769");
+  background-size:cover;
+  background-position:center;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  color:#fff;
+}
+
+/* CARD */
+.card{
+  width:420px;
+  padding:30px;
+  backdrop-filter: blur(12px);
+  background: rgba(255,255,255,.08);
+  border-radius:18px;
+  box-shadow:
+    0 0 25px rgba(0,255,255,.3),
+    inset 0 0 15px rgba(255,255,255,.1);
+  animation: float 4s ease-in-out infinite;
+}
+
+@keyframes float{
+  0%,100%{transform:translateY(0)}
+  50%{transform:translateY(-10px)}
+}
+
+h1{
+  text-align:center;
+  margin-bottom:20px;
   color:#0ff;
+  text-shadow:0 0 15px #0ff;
 }
-.box {
-  backdrop-filter: blur(10px);
-  background: rgba(0,0,0,.6);
-  padding:20px;
-  border-radius:15px;
-  box-shadow:0 0 20px #0ff;
-  margin:20px auto;
-  width:350px;
-}
-button {
+
+/* INPUT */
+input, select{
   width:100%;
-  padding:10px;
-  margin-top:10px;
+  padding:12px;
+  margin:10px 0;
+  background:transparent;
+  border:1px solid rgba(0,255,255,.4);
+  border-radius:10px;
+  color:#fff;
+  outline:none;
+}
+
+input::placeholder{color:#aaa}
+
+/* BUTTON */
+button{
+  width:100%;
+  padding:14px;
+  margin-top:15px;
   background:transparent;
   border:2px solid #0ff;
+  border-radius:12px;
   color:#0ff;
-  box-shadow:0 0 10px #0ff;
+  font-size:16px;
   cursor:pointer;
+  transition:.3s;
+  box-shadow:0 0 20px rgba(0,255,255,.4);
 }
-#panel { display:none; }
-#log { height:200px; overflow:auto; font-size:12px; }
+
+button:hover{
+  background:#0ff;
+  color:#000;
+  box-shadow:
+    0 0 25px #0ff,
+    0 0 50px #0ff;
+  transform:scale(1.05);
+}
+
+/* RESULT */
+#result{
+  margin-top:15px;
+  font-size:14px;
+  color:#0f0;
+  white-space:pre-line;
+}
 </style>
 </head>
 
 <body>
 
-<div class="box" id="login">
-  <h2>LOGIN</h2>
-  <input id="u" placeholder="Username"><br>
-  <input id="p" type="password" placeholder="Password"><br>
-  <button onclick="login()">LOGIN</button>
+<div class="card">
+  <h1>NYXO PANEL</h1>
+
+  <input id="username" placeholder="Username">
+  <input id="nomor" placeholder="Nomor WhatsApp 628xxx">
+
+  <select id="paket">
+    <option value="1gb">1 GB</option>
+    <option value="2gb">2 GB</option>
+    <option value="3gb">3 GB</option>
+    <option value="4gb">4 GB</option>
+    <option value="5gb">5 GB</option>
+    <option value="unlimited">Unlimited</option>
+  </select>
+
+  <button onclick="buatPanel()">CREATE PANEL</button>
+
+  <div id="result"></div>
 </div>
 
-<div class="box" id="panel">
-  <h2>PANEL</h2>
-  <button onclick="create()">CREATE PANEL</button>
-  <h3>LOG</h3>
-  <pre id="log"></pre>
-</div>
+<script src="config.js"></script>
 
 <script>
-let token = "";
-const device = navigator.userAgent;
+const resourceMap = {
+  "1gb": { ram:1000, disk:1000, cpu:40 },
+  "2gb": { ram:2000, disk:1000, cpu:60 },
+  "3gb": { ram:3000, disk:2000, cpu:80 },
+  "4gb": { ram:4000, disk:2000, cpu:100 },
+  "5gb": { ram:5000, disk:3000, cpu:120 },
+  "unlimited": { ram:0, disk:0, cpu:0 }
+};
 
-function log(msg){
-  document.getElementById("log").textContent =
-    msg + "\n" + document.getElementById("log").textContent;
-}
+async function buatPanel(){
+  const user = document.getElementById("username").value.toLowerCase();
+  const nomor = document.getElementById("nomor").value;
+  const paket = document.getElementById("paket").value;
+  const res = resourceMap[paket];
 
-async function login(){
-  const r = await fetch("/login",{
-    method:"POST",
-    headers:{ "Content-Type":"application/json" },
-    body:JSON.stringify({
-      username:u.value,
-      password:p.value,
-      device
-    })
-  });
-  const d = await r.json();
-  if(d.error) return alert(d.error);
-  token = d.token;
-  login.style.display="none";
-  panel.style.display="block";
-  loadLogs();
-}
+  if(!user || !nomor){
+    alert("Lengkapi data!");
+    return;
+  }
 
-async function create(){
-  const r = await fetch("/create-panel",{
-    method:"POST",
-    headers:{ Authorization:token }
-  });
-  const d = await r.json();
-  if(d.error) alert(d.error);
-  loadLogs();
-}
+  document.getElementById("result").innerText = "⏳ Membuat panel...";
 
-async function loadLogs(){
-  const r = await fetch("/logs",{ headers:{ Authorization:token }});
-  const d = await r.json();
-  log(d.join("\n"));
+  try{
+    // INI CONTOH REQUEST (HARUS VIA BACKEND NODE.JS)
+    document.getElementById("result").innerText =
+`✅ PANEL BERHASIL (SIMULASI)
+
+Username : ${user}
+Password : ${user}001
+RAM      : ${res.ram == 0 ? "Unlimited" : res.ram/1000+"GB"}
+Disk     : ${res.disk == 0 ? "Unlimited" : res.disk/1000+"GB"}
+CPU      : ${res.cpu == 0 ? "Unlimited" : res.cpu+"%"}
+Panel    : ${CONFIG.domain}`;
+  }catch(e){
+    document.getElementById("result").innerText = "❌ Error: "+e;
+  }
 }
 </script>
 
