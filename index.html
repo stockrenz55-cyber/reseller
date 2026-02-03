@@ -4,157 +4,173 @@
 <meta charset="UTF-8">
 <title>Nyxo Panel Creator</title>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
 <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;600&display=swap" rel="stylesheet">
 
 <style>
-*{margin:0;padding:0;box-sizing:border-box;font-family:'Orbitron',sans-serif}
+*{box-sizing:border-box;font-family:'Orbitron',sans-serif}
 body{
   min-height:100vh;
-  background:linear-gradient(rgba(0,0,0,.65),rgba(0,0,0,.85)),
-  url("https://images.unsplash.com/photo-1535223289827-42f1e9919769");
-  background-size:cover;
-  display:flex;
-  align-items:center;
-  justify-content:center;
-  color:#fff;
+  background:linear-gradient(120deg,#020024,#090979,#00d4ff);
+  display:flex;align-items:center;justify-content:center;color:#fff
 }
 .card{
-  width:420px;
+  width:430px;
+  background:rgba(255,255,255,.08);
+  backdrop-filter:blur(15px);
   padding:30px;
-  backdrop-filter: blur(12px);
-  background: rgba(255,255,255,.08);
-  border-radius:18px;
-  box-shadow:0 0 25px rgba(0,255,255,.3);
+  border-radius:20px;
+  box-shadow:0 0 30px rgba(0,255,255,.4)
 }
-input,select,button{
-  width:100%;
-  padding:12px;
-  margin:10px 0;
-  background:transparent;
-  border:1px solid #0ff;
-  color:#fff;
+h1{text-align:center;color:#0ff;text-shadow:0 0 20px #0ff}
+input,select{
+  width:100%;margin:10px 0;padding:12px;
+  background:transparent;border:1px solid #0ff;
+  border-radius:10px;color:#fff
 }
-button{cursor:pointer}
-pre{white-space:pre-line;color:#0f0}
+button{
+  width:100%;padding:14px;margin-top:15px;
+  background:#0ff;border:none;border-radius:12px;
+  font-size:16px;cursor:pointer;color:#000
+}
+button:hover{opacity:.85}
+.log{
+  margin-top:15px;
+  font-size:13px;
+  background:rgba(0,0,0,.4);
+  padding:10px;
+  border-radius:10px;
+  max-height:200px;
+  overflow:auto
+}
+.success{color:#0f0;white-space:pre-line}
+.error{color:#f55}
 </style>
 </head>
 
 <body>
 
-<div class="card">
-  <h2>NYXO PANEL</h2>
-  <input id="username" placeholder="Username Panel">
-  <select id="paket">
-    <option value="1gb">1 GB</option>
-    <option value="2gb">2 GB</option>
-    <option value="3gb">3 GB</option>
-    <option value="4gb">4 GB</option>
-    <option value="5gb">5 GB</option>
-    <option value="unlimited">Unlimited</option>
-  </select>
-  <button onclick="buatPanel()">CREATE PANEL</button>
-  <pre id="log"></pre>
+<div class="card" id="app">
+<h1>NYXO PANEL</h1>
+
+<input id="username" placeholder="Username Panel">
+<select id="paket">
+  <option value="1gb">1 GB</option>
+  <option value="2gb">2 GB</option>
+  <option value="3gb">3 GB</option>
+  <option value="4gb">4 GB</option>
+  <option value="5gb">5 GB</option>
+  <option value="unlimited">Unlimited</option>
+</select>
+
+<button onclick="buatPanel()">CREATE PANEL</button>
+<div class="log" id="log"></div>
 </div>
 
 <script>
-/* ========= CONFIG ========= */
+// ================= CONFIG =================
 const CONFIG = {
   domain: "https://nyxostudio.web.id",
-
-  // APPLICATION (ADMIN)
   apikey: "ptla_mIoA2uJSLrSVm0r3l21x2wTjQee9ZpCR5YjifRufQue",
-
-  // CLIENT (USER)
   capikey: "ptlc_0nPji2uEXI9WuSU6mRmBwwyG8C1TV2yen0eTGkO52Vc",
-
   egg: 15,
+  nestid: 5,
   loc: 1
 };
 
-const MAP = {
-  "1gb":{ram:1024,disk:1024,cpu:40},
-  "2gb":{ram:2048,disk:2048,cpu:60},
-  "3gb":{ram:3072,disk:2048,cpu:80},
-  "4gb":{ram:4096,disk:2048,cpu:100},
-  "5gb":{ram:5120,disk:3072,cpu:120},
+const resourceMap = {
+  "1gb":{ram:1000,disk:1000,cpu:40},
+  "2gb":{ram:2000,disk:1000,cpu:60},
+  "3gb":{ram:3000,disk:2000,cpu:80},
+  "4gb":{ram:4000,disk:2000,cpu:100},
+  "5gb":{ram:5000,disk:3000,cpu:120},
   "unlimited":{ram:0,disk:0,cpu:0}
 };
 
+// ================= UTIL =================
+function log(msg,type=""){
+  const el=document.getElementById("log");
+  el.innerHTML+=`<div class="${type}">• ${msg}</div>`;
+  el.scrollTop=el.scrollHeight;
+}
+
+// ================= MAIN =================
 async function buatPanel(){
-  const user = username.value.toLowerCase();
-  if(!user) return alert("Username wajib diisi");
-  const spec = MAP[paket.value];
-  log.textContent = "⏳ Membuat user panel...";
+  document.getElementById("log").innerHTML="";
+  const username=document.getElementById("username").value.toLowerCase();
+  const paket=document.getElementById("paket").value;
 
-  /* ===== CREATE USER ===== */
-  const u = await fetch(CONFIG.domain+"/api/application/users",{
-    method:"POST",
-    headers:{
-      "Authorization":"Bearer "+CONFIG.apikey,
-      "Content-Type":"application/json"
-    },
-    body:JSON.stringify({
-      email: user+"@panel.local",
-      username: user,
-      first_name: user,
-      last_name: "server",
-      password: user+"001"
-    })
-  });
-  const uData = await u.json();
-  if(!uData.attributes) throw new Error("Gagal create user");
+  if(!username) return alert("Username wajib diisi");
 
-  log.textContent += "\n⏳ Membuat server...";
+  const spec=resourceMap[paket];
+  const password=username+"001";
+  const email=username+"@gmail.com";
 
-  /* ===== CREATE SERVER ===== */
-  const s = await fetch(CONFIG.domain+"/api/application/servers",{
-    method:"POST",
-    headers:{
-      "Authorization":"Bearer "+CONFIG.apikey,
-      "Content-Type":"application/json"
-    },
-    body:JSON.stringify({
-      name: user+"-server",
-      user: uData.attributes.id,
-      egg: CONFIG.egg,
-      docker_image: "ghcr.io/parkervcp/yolks:nodejs_18",
-      startup: "npm start",
-      limits: spec,
-      feature_limits:{databases:0,allocations:1,backups:0},
-      allocation:{default:1},
-      deploy:{locations:[CONFIG.loc],dedicated_ip:false,port_range:[]}
-    })
-  });
-  const sData = await s.json();
-  if(!sData.attributes) throw new Error("Gagal create server");
-
-  /* ===== TEST CAPIKEY (CLIENT API) ===== */
-  log.textContent += "\n🔐 Verifikasi Client API...";
-  const c = await fetch(
-    CONFIG.domain+"/api/client/servers/"+sData.attributes.identifier,
-    {
+  try{
+    log("Membuat user panel...");
+    const userRes=await fetch(CONFIG.domain+"/api/application/users",{
+      method:"POST",
       headers:{
-        "Authorization":"Bearer "+CONFIG.capikey,
-        "Accept":"application/json"
-      }
-    }
-  );
-  const cData = await c.json();
+        "Authorization":"Bearer "+CONFIG.apikey,
+        "Content-Type":"application/json"
+      },
+      body:JSON.stringify({
+        email,username,
+        first_name:username,
+        last_name:"Server",
+        language:"en",
+        password
+      })
+    });
+    const userData=await userRes.json();
+    if(userData.errors) throw userData.errors[0].detail;
+    const user=userData.attributes;
+    log("User berhasil dibuat");
 
-  log.textContent = `
-✅ PANEL BERHASIL
+    log("Mengambil startup egg...");
+    const eggRes=await fetch(
+      `${CONFIG.domain}/api/application/nests/${CONFIG.nestid}/eggs/${CONFIG.egg}`,
+      {headers:{Authorization:"Bearer "+CONFIG.apikey}}
+    );
+    const eggData=await eggRes.json();
+    const startup=eggData.attributes.startup;
 
-Username : ${user}
-Password : ${user}001
-RAM      : ${spec.ram==0?"Unlimited":spec.ram/1024+"GB"}
-Disk     : ${spec.disk==0?"Unlimited":spec.disk/1024+"GB"}
+    log("Membuat server...");
+    const serverRes=await fetch(CONFIG.domain+"/api/application/servers",{
+      method:"POST",
+      headers:{
+        "Authorization":"Bearer "+CONFIG.apikey,
+        "Content-Type":"application/json"
+      },
+      body:JSON.stringify({
+        name: username+" Server",
+        user: user.id,
+        egg: CONFIG.egg,
+        docker_image:"ghcr.io/parkervcp/yolks:nodejs_20",
+        startup,
+        limits:{memory:spec.ram,disk:spec.disk,cpu:spec.cpu,swap:0,io:500},
+        feature_limits:{databases:5,backups:5,allocations:5},
+        deploy:{locations:[CONFIG.loc],dedicated_ip:false,port_range:[]}
+      })
+    });
+
+    const serverData=await serverRes.json();
+    if(serverData.errors) throw serverData.errors[0].detail;
+    const server=serverData.attributes;
+
+    log("SELESAI ✅","success");
+    log(`
+Username : ${username}
+Password : ${password}
+RAM      : ${spec.ram==0?"Unlimited":spec.ram/1000+"GB"}
+Disk     : ${spec.disk==0?"Unlimited":spec.disk/1000+"GB"}
 CPU      : ${spec.cpu==0?"Unlimited":spec.cpu+"%"}
-ServerID : ${sData.attributes.identifier}
+ServerID : ${server.id}
+Panel    : ${CONFIG.domain}
+`,"success");
 
-Client API : ${cData.object ? "AKTIF ✅" : "GAGAL ❌"}
-Panel     : ${CONFIG.domain}
-`;
+  }catch(err){
+    log("ERROR: "+err,"error");
+  }
 }
 </script>
 
