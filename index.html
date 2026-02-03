@@ -6,7 +6,7 @@
     <title>Panel Creator Pro</title>
     <!-- Google Fonts -->
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-    <!-- Phosphor Icons (Icon Ringan) -->
+    <!-- Phosphor Icons -->
     <script src="https://unpkg.com/@phosphor-icons/web"></script>
 
     <style>
@@ -327,11 +327,6 @@
             </div>
 
             <div class="form-group">
-                <label>Nomor WhatsApp (Opsional)</label>
-                <input type="number" id="whatsapp" placeholder="08xx...">
-            </div>
-
-            <div class="form-group">
                 <label>Pilih Spesifikasi</label>
                 <div class="dropdown-container">
                     <div class="dropdown-btn" id="ram-dropdown-btn">
@@ -411,15 +406,15 @@
     <script>
         // ==================== CONFIGURATION ====================
         const CONFIG = {
-            domain: "https://nyxostudio.web.id", // Ganti dengan domain panel asli
-            apikey: "ptla_mIoA2uJSLrSVm0r3l21x2wTjQee9ZpCR5YjifRufQue",               // Ganti dengan Application API Key
-            capikey: "ptlc_0nPji2uEXI9WuSU6mRmBwwyG8C1TV2yen0eTGkO52Vc",       // Ganti dengan Client API Key
+            domain: "https://nyxostudio.web.id",
+            apikey: "ptla_mIoA2uJSLrSVm0r3l21x2wTjQee9ZpCR5YjifRufQue",
+            capikey: "ptlc_0nPji2uEXI9WuSU6mRmBwwyG8C1TV2yen0eTGkO52Vc",
             egg: 15,
             nestid: 5,
             loc: 1
         };
 
-        // Resource Mapping (Sama persis dengan kode WA asli)
+        // Resource Mapping
         const RESOURCE_MAP = {
             "1gb": { ram: "1000", disk: "1000", cpu: "40" },
             "2gb": { ram: "2000", disk: "1000", cpu: "60" },
@@ -434,7 +429,6 @@
             "unlimited": { ram: "0", disk: "0", cpu: "0" }
         };
 
-        // State Global
         let selectedRamKey = null;
         let generatedData = null;
 
@@ -444,18 +438,14 @@
             initRippleEffect();
         });
 
-        // Render Dropdown Options
         function initDropdown() {
             const menu = document.getElementById('ram-menu');
             const btn = document.getElementById('ram-dropdown-btn');
             const txt = document.getElementById('selected-ram-text');
 
-            // Populate items
             for (const [key, val] of Object.entries(RESOURCE_MAP)) {
                 const item = document.createElement('div');
                 item.className = 'dropdown-item';
-                
-                // Format text display
                 let label = key.toUpperCase();
                 let detail = `RAM ${val.ram === "0" ? "Unli" : val.ram/1000+"GB"} | CPU ${val.cpu}%`;
                 
@@ -464,19 +454,17 @@
                 item.addEventListener('click', () => {
                     selectedRamKey = key;
                     txt.innerText = label;
-                    btn.classList.add('active'); // Visual feedback
+                    btn.classList.add('active');
                     closeDropdown();
                 });
                 menu.appendChild(item);
             }
 
-            // Toggle dropdown
             btn.addEventListener('click', (e) => {
                 e.stopPropagation();
                 menu.classList.toggle('show');
             });
 
-            // Close when clicking outside
             document.addEventListener('click', (e) => {
                 if (!menu.contains(e.target) && !btn.contains(e.target)) {
                     closeDropdown();
@@ -504,10 +492,9 @@
             });
         }
 
-        // ==================== CORE LOGIC (MOCK API) ====================
+        // ==================== CORE LOGIC (REAL API FETCH) ====================
         document.getElementById('create-btn').addEventListener('click', async () => {
             const username = document.getElementById('username').value.trim().toLowerCase();
-            const whatsapp = document.getElementById('whatsapp').value.trim();
 
             // 1. Validasi
             if (!username) {
@@ -524,64 +511,105 @@
             const email = `${username}@gmail.com`;
             const name = capitalize(username) + " Server";
             const password = username + "001";
-            const dateStr = formatDate(new Date());
 
-            // 3. Mulai Proses (Loading)
             toggleLoading(true);
 
             try {
-            // 1. Create User
-            let f = await fetch(CONFIG.domain + "/api/application/users", {
-                method: "POST",
-                headers: { "Accept": "application/json", "Content-Type": "application/json", "Authorization": "Bearer " + CONFIG.apikey },
-                body: JSON.stringify({ email, username, first_name: name, last_name: "Server", language: "en", password })
-            });
-            let data = await f.json();
-            if (data.errors) throw new Error(JSON.stringify(data.errors));
-            let user = data.attributes;
+                // --- STEP 1: CREATE USER ---
+                let f = await fetch(CONFIG.domain + "/api/application/users", {
+                    method: "POST",
+                    headers: { 
+                        "Accept": "application/json", 
+                        "Content-Type": "application/json", 
+                        "Authorization": "Bearer " + CONFIG.apikey 
+                    },
+                    body: JSON.stringify({ 
+                        email, username, 
+                        first_name: name, 
+                        last_name: "Server", 
+                        language: "en", 
+                        password 
+                    })
+                });
+                let data = await f.json();
+                if (data.errors) throw new Error("User Error: " + JSON.stringify(data.errors));
+                let user = data.attributes;
 
-            // 2. Get Egg
-            let f1 = await fetch(CONFIG.domain + `/api/application/nests/${CONFIG.nestid}/eggs/` + CONFIG.egg, {
-                method: "GET",
-                headers: { "Accept": "application/json", "Content-Type": "application/json", "Authorization": "Bearer " + CONFIG.apikey }
-            });
-            let data2 = await f1.json();
-            let startup_cmd = data2.attributes.startup;
+                // --- STEP 2: GET EGG DETAILS (Startup Command) ---
+                let f1 = await fetch(CONFIG.domain + `/api/application/nests/${CONFIG.nestid}/eggs/` + CONFIG.egg, {
+                    method: "GET",
+                    headers: { 
+                        "Accept": "application/json", 
+                        "Content-Type": "application/json", 
+                        "Authorization": "Bearer " + CONFIG.apikey 
+                    }
+                });
+                let data2 = await f1.json();
+                if (data2.errors) throw new Error("Egg Error: " + JSON.stringify(data2.errors));
+                let startup_cmd = data2.attributes.startup;
 
-            // 3. Create Server
-            let f2 = await fetch(CONFIG.domain + "/api/application/servers", {
-                method: "POST",
-                headers: { "Accept": "application/json", "Content-Type": "application/json", "Authorization": "Bearer " + CONFIG.apikey },
-                body: JSON.stringify({
-                    name, description: formatDate(new Date()), user: user.id,
-                    egg: parseInt(CONFIG.egg), docker_image: "ghcr.io/parkervcp/yolks:nodejs_20",
-                    startup: startup_cmd,
-                    environment: { INST: "npm", USER_UPLOAD: "0", AUTO_UPDATE: "0", CMD_RUN: "npm start" },
-                    limits: { memory: ram, swap: 0, disk, io: 500, cpu },
-                    feature_limits: { databases: 5, backups: 5, allocations: 5 },
-                    deploy: { locations: [parseInt(CONFIG.loc)], dedicated_ip: false, port_range: [] }
-                })
-            });
-            let result = await f2.json();
-            if (result.errors) throw new Error(JSON.stringify(result.errors));
-            
-            // Process result...
-        } catch (err) {
-            throw err;
-        }
+                // --- STEP 3: CREATE SERVER ---
+                let f2 = await fetch(CONFIG.domain + "/api/application/servers", {
+                    method: "POST",
+                    headers: { 
+                        "Accept": "application/json", 
+                        "Content-Type": "application/json", 
+                        "Authorization": "Bearer " + CONFIG.apikey 
+                    },
+                    body: JSON.stringify({
+                        name,
+                        description: formatDate(new Date()),
+                        user: user.id,
+                        egg: parseInt(CONFIG.egg),
+                        docker_image: "ghcr.io/parkervcp/yolks:nodejs_20",
+                        startup: startup_cmd,
+                        environment: { 
+                            INST: "npm", 
+                            USER_UPLOAD: "0", 
+                            AUTO_UPDATE: "0", 
+                            CMD_RUN: "npm start" 
+                        },
+                        limits: { memory: ram, swap: 0, disk, io: 500, cpu },
+                        feature_limits: { databases: 5, backups: 5, allocations: 5 },
+                        deploy: { locations: [parseInt(CONFIG.loc)], dedicated_ip: false, port_range: [] }
+                    })
+                });
+                let result = await f2.json();
+                if (result.errors) throw new Error("Server Error: " + JSON.stringify(result.errors));
+                
+                // --- SUCCESS ---
+                let server = result.attributes;
+                
+                // Simpan data untuk keperluan copy/reset
+                generatedData = {
+                    user: { username: user.username },
+                    server: { id: server.id, description: result.attributes.description },
+                    password: password,
+                    rawRam: ram,
+                    rawDisk: disk,
+                    rawCpu: cpu
+                };
+
+                renderResult(generatedData);
+                showToast("Panel berhasil dibuat!", "success");
+
+            } catch (err) {
+                console.error(err);
+                showToast(err.message, "error");
+            } finally {
+                toggleLoading(false);
+            }
+        });
 
         // ==================== RENDER HASIL ====================
         function renderResult(data) {
-            // Sembunyikan form, tampilkan result
             document.getElementById('form-section').style.display = 'none';
             document.getElementById('result-section').style.display = 'block';
 
-            // Format Data untuk tampilan
             const ramDisplay = data.rawRam == "0" ? "Unlimited" : (data.rawRam / 1000) + "GB";
             const diskDisplay = data.rawDisk == "0" ? "Unlimited" : (data.rawDisk / 1000) + "GB";
             const cpuDisplay = data.rawCpu == "0" ? "Unlimited" : data.rawCpu + "%";
 
-            // Isi ke DOM
             document.getElementById('disp-ram').innerText = ramDisplay;
             document.getElementById('disp-disk').innerText = diskDisplay;
             document.getElementById('disp-cpu').innerText = cpuDisplay;
@@ -591,20 +619,15 @@
             document.getElementById('res-id').innerText = "#" + data.server.id;
             document.getElementById('res-date').innerText = data.server.description;
 
-            // Set Link Panel
             document.getElementById('btn-open-panel').href = CONFIG.domain;
         }
 
         function resetForm() {
-            // Reset state
             generatedData = null;
             selectedRamKey = null;
             document.getElementById('username').value = '';
-            document.getElementById('whatsapp').value = '';
             document.getElementById('selected-ram-text').innerText = "Pilih RAM";
             document.getElementById('ram-dropdown-btn').classList.remove('active');
-
-            // Toggle tampilan
             document.getElementById('result-section').style.display = 'none';
             document.getElementById('form-section').style.display = 'block';
         }
@@ -636,10 +659,7 @@
             
             container.appendChild(toast);
             
-            // Animasi masuk
             setTimeout(() => toast.classList.add('show'), 10);
-
-            // Hapus setelah 3 detik
             setTimeout(() => {
                 toast.classList.remove('show');
                 setTimeout(() => toast.remove(), 400);
@@ -653,59 +673,6 @@
         function formatDate(date) {
             return date.toLocaleDateString('id-ID', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
         }
-
-        /* 
-        CATATAN INTEGRASI BACKEND:
-        Untuk mengganti Mock API dengan API Pterodactyl Asli:
-        
-        1. Uncomment kode fetch di bawah ini.
-        2. Pastikan CONFIG.domain dan CONFIG.apikey sudah benar.
-        3. Hapus atau return early di fungsi simulatePanelCreation.
-
-        // Contoh Implementasi Fetch Asli (PSEUDOCODE)
-        /*
-        try {
-            // 1. Create User
-            let f = await fetch(CONFIG.domain + "/api/application/users", {
-                method: "POST",
-                headers: { "Accept": "application/json", "Content-Type": "application/json", "Authorization": "Bearer " + CONFIG.apikey },
-                body: JSON.stringify({ email, username, first_name: name, last_name: "Server", language: "en", password })
-            });
-            let data = await f.json();
-            if (data.errors) throw new Error(JSON.stringify(data.errors));
-            let user = data.attributes;
-
-            // 2. Get Egg
-            let f1 = await fetch(CONFIG.domain + `/api/application/nests/${CONFIG.nestid}/eggs/` + CONFIG.egg, {
-                method: "GET",
-                headers: { "Accept": "application/json", "Content-Type": "application/json", "Authorization": "Bearer " + CONFIG.apikey }
-            });
-            let data2 = await f1.json();
-            let startup_cmd = data2.attributes.startup;
-
-            // 3. Create Server
-            let f2 = await fetch(CONFIG.domain + "/api/application/servers", {
-                method: "POST",
-                headers: { "Accept": "application/json", "Content-Type": "application/json", "Authorization": "Bearer " + CONFIG.apikey },
-                body: JSON.stringify({
-                    name, description: formatDate(new Date()), user: user.id,
-                    egg: parseInt(CONFIG.egg), docker_image: "ghcr.io/parkervcp/yolks:nodejs_20",
-                    startup: startup_cmd,
-                    environment: { INST: "npm", USER_UPLOAD: "0", AUTO_UPDATE: "0", CMD_RUN: "npm start" },
-                    limits: { memory: ram, swap: 0, disk, io: 500, cpu },
-                    feature_limits: { databases: 5, backups: 5, allocations: 5 },
-                    deploy: { locations: [parseInt(CONFIG.loc)], dedicated_ip: false, port_range: [] }
-                })
-            });
-            let result = await f2.json();
-            if (result.errors) throw new Error(JSON.stringify(result.errors));
-            
-            // Process result...
-        } catch (err) {
-            throw err;
-        }
-        */
-
     </script>
 </body>
-  </html>
+                        </html>
